@@ -274,11 +274,11 @@ let voices=[];
 function pickVoice(){try{voices=speechSynthesis.getVoices().filter(v=>/^de/i.test(v.lang));const want=ls.get('kp-voice');const nat=voices.filter(x=>/natural|online|neural/i.test(x.name));voice=voices.find(x=>x.name===want)||nat.find(x=>/conrad|killian|florian/i.test(x.name))||nat[0]||voices.find(x=>/google/i.test(x.name))||voices[0]||null;if(G&&G.ph==='lobby')hRender()}catch(e){}}
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
 function say(txt,wait){
-  const est=Math.min(14000,1500+txt.split(' ').length*330);
+  const est=Math.min(20000,1500+txt.split(' ').length*380);
   if(muted||!window.speechSynthesis)return new Promise(r=>setTimeout(r,wait?Math.min(9000,est):0));
-  return new Promise(res=>{let done=false;const fin=()=>{if(!done){done=true;res()}};
-    try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='de-DE';if(voice)u.voice=voice;u.rate=1.08;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){fin()}
-    setTimeout(fin,est+4000)});
+  return new Promise(res=>{let done=false,started=false;const fin=()=>{if(!done){done=true;res()}};
+    try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='de-DE';if(voice)u.voice=voice;u.rate=1.05;u.onstart=()=>{started=true;setTimeout(fin,est*2+8000)};u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){fin()}
+    setTimeout(()=>{if(!started)fin()},9000)});
 }
 let auto=true,autoT=null;
 function autoNext(s,ms){clearTimeout(autoT);if(!auto)return;G.autoAt=Date.now()+ms;hRender();autoT=setTimeout(()=>{if(auto&&cur()===s&&G.ph==='rev')next()},ms)}
