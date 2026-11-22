@@ -167,6 +167,28 @@ const key=n=>String(n||'').trim().toLowerCase().slice(0,24);
 const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const PFX='kein-plan-berater-';
+const QS2=[
+{i:'Willkommen zu Runde zwei! Neue Fragen, gleiche Tagessätze. Wer in Runde eins geglänzt hat: Das ist jetzt egal.',q:'Wie viele Zeichen durfte ein Tweet ursprünglich maximal haben?',a:['120','140','160','280'],c:1,r:'140 Zeichen. Genug für eine Management Summary. Mehr liest eh keiner.'},
+{i:'Eine Frage für die Kaffeetrinker.',q:'Welches Unternehmen hat die Programmiersprache Java ursprünglich entwickelt?',a:['Oracle','Sun Microsystems','IBM','Microsoft'],c:1,r:'Sun Microsystems. Oracle kam erst später dazu, zusammen mit sehr kreativen Lizenzmodellen.'},
+{i:'Vertragsrecht für Anfänger.',q:'Wofür steht die Abkürzung SLA?',a:['Service Level Agreement','System Load Analysis','Software License Audit','Schnell, Leise, Abrechenbar'],c:0,r:'Service Level Agreement. Also das Dokument, das im Incident plötzlich niemand gelesen hat.'},
+{i:'Ein bisschen Firmengeschichte aus der Kurpfalz.',q:'In welchem Jahr wurde SAP gegründet?',a:['1964','1972','1983','1991'],c:1,r:'1972, von fünf ehemaligen IBM-Mitarbeitern. Die Einführungsprojekte von damals laufen teilweise heute noch.'},
+{i:'Jetzt die Lieblingsregel aller Berater.',q:'Das Pareto-Prinzip sagt: Mit 20 Prozent des Aufwands erreicht man …?',a:['20 Prozent des Ergebnisses','50 Prozent des Ergebnisses','80 Prozent des Ergebnisses','Den nächsten Folgeauftrag'],c:2,r:'80 Prozent. Die restlichen 20 Prozent stehen dann im Change Request.'},
+{i:'Ab jetzt doppelter Tagessatz. Netzwerker, eure Stunde.',q:'Wie viele Bit hat eine IPv6-Adresse?',a:['32','64','128','256'],c:2,r:'128 Bit. Genug Adressen, um jedem Sandkorn eine eigene IP zu geben. Und trotzdem hängt der Drucker.'},
+{dd:1},
+{i:'Weiter mit IT-Sicherheit. Bitte alle kurz die Bildschirme sperren.',q:'Was ist eine Zero-Day-Lücke?',a:['Eine Lücke, für die es noch keinen Patch gibt','Der erste Tag nach dem Go-Live','Ein Arbeitstag ohne Meetings','Ein Backup ohne Daten'],c:0,r:'Eine Lücke ohne Patch. Ein Arbeitstag ohne Meetings wäre allerdings die größere Sensation.'},
+{i:'Startup-Geschichte für Fortgeschrittene.',q:'Unter welchem Namen startete Google ursprünglich?',a:['Googol','BackRub','Searchy','PageRank Inc.'],c:1,r:'BackRub! Klingt eher nach Wellness als nach Weltherrschaft.'},
+{i:'Eine Frage für alle, die Projektpläne in Excel bauen. Also für euch.',q:'Wie viele Spalten hat ein Excel-Arbeitsblatt seit Excel 2007 maximal?',a:['256','1.024','16.384','65.536'],c:2,r:'16.384, bis Spalte XFD. Und trotzdem baut irgendwer einen Projektplan, der nicht reicht.'},
+{i:'Governance! Alle mal ernst gucken.',q:'Wofür steht RACI in der Verantwortungsmatrix?',a:['Responsible, Accountable, Consulted, Informed','Requirements, Architecture, Code, Integration','Risk, Action, Cost, Impact','Rechnung, Angebot, Change, Irgendwas'],c:0,r:'Responsible, Accountable, Consulted, Informed. In der Praxis: alle informiert, keiner verantwortlich.'},
+{i:'Dreifacher Tagessatz. Jetzt wird es teuer.',q:'Was bedeutet der HTTP-Statuscode 401?',a:['Nicht autorisiert','Verboten','Nicht gefunden','Interner Serverfehler'],c:0,r:'401, Unauthorized. 403 wäre verboten. Merkt euch das für den nächsten Pen-Test-Bericht.'},
+{i:'Hardware-Frage. Gordon Moore lässt grüßen.',q:'Laut Moores Gesetz verdoppelt sich die Zahl der Transistoren auf einem Chip etwa alle …?',a:['6 Monate','2 Jahre','5 Jahre','10 Jahre'],c:1,r:'Etwa alle zwei Jahre. Eure Budgets verdoppeln sich leider nicht mit.'},
+{i:'Vorletzte Frage. Ehre, wem Ehre gebührt.',q:'Wer gilt als erste Programmiererin der Welt?',a:['Grace Hopper','Ada Lovelace','Margaret Hamilton','Hedy Lamarr'],c:1,r:'Ada Lovelace, schon im 19. Jahrhundert. Ganz ohne Stack Overflow.'},
+{i:'Die Finalfrage der zweiten Runde! Alles oder nichts.',q:'Welches Produkt wurde 1974 als erstes an einer Supermarktkasse per Barcode gescannt?',a:['Kaugummi','Cornflakes','Cola','Bananen'],c:0,r:'Eine Packung Kaugummi! Wrigley’s Juicy Fruit. Und seitdem piept es überall.'}
+];
+const DD2={i:'Dis oder Dat, Runde zwei! Programmiersprache oder Ikea-Produkt? Sechs Sekunden pro Name. Richtig gibt 500 Euro, falsch kostet 500.',opts:['Programmiersprache','Ikea-Produkt'],items:[['Zig',0],['Skubb',1],['Nim',0],['Malm',1],['Elm',0],['Lack',1],['Dart',0],['Frakta',1]],end:'Dis oder Dat ist vorbei. Manche von euch sollten ihre Software lieber mit Inbusschlüssel zusammenbauen.'};
+DD.end='Dis oder Dat ist vorbei. Schaut auf eure Kontostände. Manche von euch sollten über einen Jobwechsel zu Nintendo nachdenken.';
+const PACKS=[{n:'Runde 1',qs:QS,dd:DD},{n:'Runde 2',qs:QS2,dd:DD2}];
+let packIdx=(()=>{const v=parseInt(ls.get('kp-pack')??'1',10);return isNaN(v)?1:v%PACKS.length})();
+const curDD=()=>PACKS[packIdx].dd;
 const hasPeer=typeof window.Peer==='function';
 let mode=null,wake=null;
 function keepAwake(){try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>wake=w).catch(()=>{})}catch(e){}}
@@ -211,9 +233,9 @@ function boardHtml(){
 function hush(){try{speechSynthesis.cancel()}catch(e){}}
 $('#mute').onclick=()=>{muted=!muted;if(muted)hush();$('#mute').textContent=muted?'Ton aus':'Ton an'};
 function buildPlan(){
-  const p=[];let n=0;const total=QS.filter(q=>!q.dd).length;
-  QS.forEach(q=>{
-    if(q.dd){p.push({k:'ddi'});shuffle(DD.items).forEach((it,j)=>p.push({k:'dd',t:it[0],c:it[1],a:DD.opts,n:j+1,of:DD.items.length,val:500}));p.push({k:'dde'});return}
+  const P=PACKS[packIdx],DDx=P.dd;const p=[];let n=0;const total=P.qs.filter(q=>!q.dd).length;
+  P.qs.forEach(q=>{
+    if(q.dd){p.push({k:'ddi'});shuffle(DDx.items).forEach((it,j)=>p.push({k:'dd',t:it[0],c:it[1],a:DDx.opts,n:j+1,of:DDx.items.length,val:500}));p.push({k:'dde'});return}
     n++;p.push(Object.assign({k:'q',n,of:total,val:n<=5?1000:n<=11?2000:3000},q));
   });return p;
 }
@@ -263,11 +285,11 @@ function sendTo(c){try{c.open&&c.send(state())}catch(e){}}
 function hPub(){if(!G)return;for(const x of conns.values())sendTo(x.c)}
 function hLabel(){const s=cur();if(!s||G.ph==='lobby')return 'Lobby';if(G.ph==='end')return 'Finale';if(s.k==='q')return `Frage ${s.n} von ${s.of} · ${eur(s.val)}`;return 'Dis oder Dat'}
 function next(){
-  hush();clearInterval(tick);clearTimeout(autoT);G.autoAt=0;G.step++;G.last={};const s=cur();
+  hush();clearInterval(tick);clearTimeout(autoT);G.autoAt=0;if(G.step<0)ls.set('kp-pack',String((packIdx+1)%PACKS.length));G.step++;G.last={};const s=cur();
   if(!s){G.ph='end';hRender();hPub();beep(523,.15);setTimeout(()=>beep(659,.15),160);setTimeout(()=>beep(784,.4),320);
     const top=Object.values(G.scores).sort((a,b)=>b.s-a.s)[0];say(top?`Das war's! Gewinner des Abends: ${top.n}, mit ${top.s} Euro. Du darfst morgen das Statusmeeting moderieren. Herzlichen Glückwunsch.`:'Das war Kein Plan, Herr Berater. Gute Nacht.');return}
-  if(s.k==='ddi'){G.ph='intro';hRender();hPub();say(DD.i,true).then(()=>{if(cur()===s)next()});return}
-  if(s.k==='dde'){G.ph='rev';hRender();hPub();say('Dis oder Dat ist vorbei. Schaut auf eure Kontostände. Manche von euch sollten über einen Jobwechsel zu Nintendo nachdenken.',true).then(()=>autoNext(s,2500));return}
+  if(s.k==='ddi'){G.ph='intro';hRender();hPub();say(curDD().i,true).then(()=>{if(cur()===s)next()});return}
+  if(s.k==='dde'){G.ph='rev';hRender();hPub();say(curDD().end,true).then(()=>autoNext(s,2500));return}
   if(s.k==='dd'){say(s.t);ask(6);return}
   G.ph='read';hRender();hPub();
   say(s.i+' '+s.q,true).then(()=>{if(cur()===s&&G.ph==='read')ask(16)});
@@ -301,9 +323,10 @@ function hRender(){
         <div class="hint" style="max-width:34ch;margin-top:8px">${netOk?'Schnelle richtige Antworten bringen mehr Tagessatz, falsche kosten die Hälfte.':esc(netErr||'Verbinde mit dem Vermittlungsserver …')}</div></div>
       </div>
       <div class="players">${ps.length?ps.map(p=>`<div class="pl">${esc(p.name)}</div>`).join(''):'<div class="hint">Noch niemand da.</div>'}</div>
+      <div class="meta">Fragen: ${PACKS.map((P,i)=>`<button class="ibtn${i===packIdx?' on':''}" data-pack="${i}">${P.n}</button>`).join(' ')}</div>
       <div><button class="btn" id="go" style="display:inline-block;padding:20px 40px">Show starten</button> <span class="hint">&nbsp;Danach läuft alles automatisch. P = Pause</span></div>`;
   }else if(G.ph==='intro'){
-    st.innerHTML=`<div class="marq big">Dis oder Dat</div><div class="qtext">Pokémon oder Big-Data-Tool?</div><div class="quip">${esc(DD.i)}</div>`;
+    st.innerHTML=`<div class="marq big">Dis oder Dat</div><div class="qtext">${esc(curDD().opts.join(' oder '))}?</div><div class="quip">${esc(curDD().i)}</div>`;
   }else if(G.ph==='end'){
     const r=Object.values(G.scores).sort((a,b)=>b.s-a.s);
     st.innerHTML=`<div class="marq big">Endstand</div><div class="podium">${r.map((x,i)=>`<div><span>${i+1}. ${esc(x.n)}</span><span>${eur(x.s)}</span></div>`).join('')||'<div><span>Keine Handys dabei</span><span>Ehre: unbezahlbar</span></div>'}</div><div><button class="btn" id="again" style="display:inline-block;padding:18px 36px">Neue Show</button></div>`;
@@ -314,13 +337,13 @@ function hRender(){
       ${G.boardLine?`<div class="quip">${esc(G.boardLine)}</div>`:''}
       <div style="display:flex;gap:14px;align-items:center"><button class="btn" id="go" style="padding:16px 30px">${G.step+1<G.plan.length?'Nächste Frage':'Zum Endstand'}</button><span class="auto">${auto?'geht automatisch weiter':'Auto aus: Leertaste'}</span></div>`;
   }else if(s.k==='dde'){
-    st.innerHTML=`<div class="marq big">Dis oder Dat: vorbei</div><div class="quip">Manche von euch sollten über einen Jobwechsel zu Nintendo nachdenken.</div><div><button class="btn" id="go" style="display:inline-block;padding:18px 36px">Weiter</button></div>`;
+    st.innerHTML=`<div class="marq big">Dis oder Dat: vorbei</div><div class="quip">${esc(curDD().end)}</div><div><button class="btn" id="go" style="display:inline-block;padding:18px 36px">Weiter</button></div>`;
   }else{
     const rev=G.ph==='rev',chose=i=>Object.entries(G.ans).filter(([k,a])=>a.a===i).map(([k])=>esc(G.scores[k]?G.scores[k].n:k)).join(', ');
     const cards=s.a.map((t,i)=>`<div class="an ${rev?(i===s.c?'ok':'no'):''}"><span class="l" style="background:${ACOL[i]}">${LET[i]}</span><span>${esc(t)}${rev?`<span class="who">${chose(i)||'&nbsp;'}</span>`:''}</span></div>`).join('');
     const cnt=Object.keys(G.ans).length,tot=livePlayers().length;
     if(s.k==='dd'){
-      st.innerHTML=`<div class="meta"><span class="pill">Dis oder Dat ${s.n}/${s.of}</span><span>Pokémon oder Big-Data-Tool?</span></div>
+      st.innerHTML=`<div class="meta"><span class="pill">Dis oder Dat ${s.n}/${s.of}</span><span>${esc(curDD().opts.join(' oder '))}?</span></div>
         <div class="tbarline" id="tline"><i></i></div><div class="item">${esc(s.t)}</div><div class="dd">${cards}</div>`;
     }else{
       st.innerHTML=`<div class="meta"><span class="pill">${esc(hLabel())}</span>${G.ph==='q'?`<span id="cnt">${cnt} von ${tot} haben geantwortet</span>`:''}</div>
@@ -330,6 +353,7 @@ function hRender(){
         ${rev?`<div style="display:flex;gap:2vw;align-items:center;flex-wrap:wrap"><div class="quip" style="flex:1 1 420px">${esc(s.r)}</div><div style="flex:none;display:grid;gap:6px;justify-items:center"><button class="btn" id="go" style="padding:18px 32px">${G.step+1<G.plan.length?'Nächste Frage':'Zum Endstand'}</button><span class="auto">${auto?'geht automatisch weiter':'Auto aus: Leertaste'}</span></div></div>`:''}`;
     }
   }
+  document.querySelectorAll('[data-pack]').forEach(b=>b.onclick=()=>{packIdx=+b.dataset.pack;G.plan=buildPlan();hRender()});
   const go=$('#go');if(go)go.onclick=()=>{const c=cur();if(G.ph==='rev'&&c&&c.k==='q')showBoard(c);else next()};const ag=$('#again');if(ag)ag.onclick=()=>{hush();hostInit()};
   hScore();
 }
@@ -379,7 +403,7 @@ function pRender(){
   const ph=host.ph,a=Array.isArray(host.a)?host.a:[];
   if(ph==='lobby'){b.innerHTML=`<div class="state">Du bist drin, ${esc(me)}.</div><p class="muted">Gleich geht's los. Schnell und richtig bringt am meisten.</p>${warn}`;return}
   if(ph==='end'){b.innerHTML=`<div class="state">${m?`Platz ${m.rank} von ${m.of}`:'Show vorbei'}</div><p class="ptimer">${m?eur(m.s):''}</p><p class="muted">Danke fürs Mitspielen.</p>`;return}
-  if(ph==='intro'){b.innerHTML=`<div class="state">Dis oder Dat!</div><p class="muted">Pokémon oder Big-Data-Tool? Sechs Sekunden pro Name.</p>${warn}`;return}
+  if(ph==='intro'){b.innerHTML=`<div class="state">Dis oder Dat!</div><p class="muted">Sechs Sekunden pro Name. Schau auf den Fernseher.</p>${warn}`;return}
   if(ph==='read'){b.innerHTML=`<p class="muted">${esc(host.lab)}</p><div class="state" style="font-size:24px">${esc(host.t)}</div><p class="muted">Hör zu, gleich darfst du drücken.</p>${warn}`;return}
   if(ph==='q'){
     if(myA!=null){b.innerHTML=`<div class="state">Antwort ${host.k==='dd'?esc(a[myA]):LET[myA]} ist eingeloggt.</div><p class="muted">Kein Zurück. Wie im echten Projekt.</p>${warn}`;return}
