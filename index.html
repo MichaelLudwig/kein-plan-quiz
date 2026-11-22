@@ -144,7 +144,7 @@ body.fxon .tbar,body.fxon .sbar{background:rgba(10,20,34,.92)}
 </section>
 
 <div id="tv">
-  <div class="tbar"><span class="logo"><svg viewBox="0 0 148 40" role="img" aria-label="Kioptra"><g transform="translate(-2.84,-9.4) scale(0.186)" fill="none" stroke="#E3B54A" stroke-linecap="round" stroke-linejoin="round"><line x1="90" y1="180" x2="56" y2="250" stroke-width="11"></line><line x1="114" y1="180" x2="114" y2="254" stroke-width="11"></line><line x1="138" y1="180" x2="172" y2="250" stroke-width="11"></line><line x1="114" y1="82" x2="114" y2="180" stroke-width="9"></line><path d="M53.8 96.7 A62 62 0 0 0 174.2 67.3" stroke-width="10"></path><line x1="32" y1="102" x2="196" y2="62" stroke-width="12"></line><line x1="76" y1="180" x2="152" y2="180" stroke-width="13"></line></g><text x="42" y="27" font-family="IBM Plex Sans,system-ui,sans-serif" font-weight="600" font-size="23" letter-spacing="-0.3" fill="#eef3fb">Kioptra</text></svg></span><span class="marq">Kein Plan, Herr Berater</span><span class="lab" id="tLab"></span><span class="mini" id="tCode"></span><button class="ibtn" id="pause">Auto an</button><button class="ibtn" id="mute">Ton an</button></div>
+  <div class="tbar"><span class="logo"><svg viewBox="0 0 148 40" role="img" aria-label="Kioptra"><g transform="translate(-2.84,-9.4) scale(0.186)" fill="none" stroke="#E3B54A" stroke-linecap="round" stroke-linejoin="round"><line x1="90" y1="180" x2="56" y2="250" stroke-width="11"></line><line x1="114" y1="180" x2="114" y2="254" stroke-width="11"></line><line x1="138" y1="180" x2="172" y2="250" stroke-width="11"></line><line x1="114" y1="82" x2="114" y2="180" stroke-width="9"></line><path d="M53.8 96.7 A62 62 0 0 0 174.2 67.3" stroke-width="10"></path><line x1="32" y1="102" x2="196" y2="62" stroke-width="12"></line><line x1="76" y1="180" x2="152" y2="180" stroke-width="13"></line></g><text x="42" y="27" font-family="IBM Plex Sans,system-ui,sans-serif" font-weight="600" font-size="23" letter-spacing="-0.3" fill="#eef3fb">Kioptra</text></svg></span><span class="marq">Kein Plan, Herr Berater</span><span class="lab" id="tLab"></span><span class="mini" id="tCode"></span><button class="ibtn" id="finb">Finale</button><button class="ibtn" id="pause">Auto an</button><button class="ibtn" id="mute">Ton an</button></div>
   <div class="stagebox" id="stage"></div>
   <div class="sbar" id="sbar"></div>
 </div>
@@ -214,7 +214,14 @@ function freshCount(){if(!G)return 0;return POOL.reduce((a,set)=>a+setSteps(set)
 async function loadPool(){try{const r=await fetch('questions.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();(j.sets||[]).forEach(set=>{if(set&&set.id&&Array.isArray(set.qs)&&!POOL.some(x=>x.id===set.id))POOL.push(set)});(j.roasts||[]).forEach(x=>{if(!ROASTS.includes(x))ROASTS.push(x)});(j.leads||[]).forEach(x=>{if(!LEADS.includes(x))LEADS.push(x)});poolOk=true}catch(e){if(!poolOk&&!POOL.length){POOL.push({id:'p1',qs:QS,dd:DD},{id:'p2',qs:QS2,dd:DD2})}}
   if(G&&G.ph==='wait'&&refill())next();else if(G&&G.ph==='lobby')hRender()}
 setInterval(()=>{if(mode==='host')loadPool()},40000);
-function saveState(){if(!G)return;ls.set('kp-state',JSON.stringify({scores:G.scores,done:G.done,n:G.n,t:Date.now()}))}
+const FINALS=[
+{i:'',q:'Was bedeutet die Abkürzung PT in einem Beratungsangebot?',a:['Personentag','Projekttag','Pauschaltarif','Planungstermin'],c:0,r:'Personentag! Die Währung, in der wir alle denken. Auch heute Abend.'},
+{i:'',q:'Welches dieser Tools gehört NICHT zu Microsoft 365?',a:['Teams','SharePoint','Slack','Outlook'],c:2,r:'Slack! Das gehört zu Salesforce. Und wer jetzt Teams gedrückt hat: Wir müssen reden.'},
+{i:'',q:'Seit wann muss die DSGVO verbindlich angewendet werden?',a:['Mai 2016','Mai 2018','Januar 2020','Januar 2022'],c:1,r:'Seit dem 25. Mai 2018. In Kraft getreten ist sie schon 2016, aber die Schonfrist ist vorbei. Wie für manche Kontostände jetzt auch.'},
+{i:'',q:'Wofür steht das D in DSGVO?',a:['Daten','Datenschutz','Digital','Deutsche'],c:1,r:'Datenschutz-Grundverordnung. Wer Deutsche gedrückt hat: Es ist eine EU-Verordnung. Autsch.'}
+];
+const FIN_I='Und jetzt: das große Finale! Alles oder nichts! Jeder setzt seinen kompletten Kontostand. Mindestens 1.000 Euro. Richtig verdoppelt, falsch oder keine Antwort heißt: alles weg. Zwanzig Sekunden. Viel Glück, ihr werdet es brauchen.';
+function saveState(){if(!G)return;ls.set('kp-state',JSON.stringify({scores:G.scores,done:G.done,n:G.n,limit:G.limit,fdone:G.fdone,t:Date.now()}))}
 const hasPeer=typeof window.Peer==='function';
 let mode=null,wake=null;
 function keepAwake(){try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>wake=w).catch(()=>{})}catch(e){}}
@@ -283,8 +290,9 @@ function say(txt,wait){
 let auto=true,autoT=null;
 function autoNext(s,ms){clearTimeout(autoT);if(!auto)return;G.autoAt=Date.now()+ms;hRender();autoT=setTimeout(()=>{if(auto&&cur()===s&&G.ph==='rev')next()},ms)}
 $('#pause').onclick=()=>{auto=!auto;$('#pause').textContent=auto?'Auto an':'Auto aus';$('#pause').classList.toggle('on',!auto);if(!auto){clearTimeout(autoT);G&&(G.autoAt=0);G&&hRender()}else if(G&&cur()&&G.ph==='rev'){const s=cur();s.k==='q'?(autoT=setTimeout(()=>showBoard(s),1500)):autoNext(s,1500)}else if(G&&cur()&&G.ph==='board'){const s=cur();autoT=setTimeout(()=>{if(cur()===s&&G.ph==='board')next()},1500)}};
-function actE(){const live=new Set(livePlayers().map(p=>key(p.name)));const e=Object.entries(G.scores);const f=e.filter(([k])=>live.has(k));return f.length?f:e}
+function actE(){const live=new Set(livePlayers().map(p=>key(p.name)));G.miss=G.miss||{};G.kick=G.kick||{};const e=Object.entries(G.scores).filter(([k])=>!G.kick[k]);const f=e.filter(([k])=>live.has(k)&&(G.miss[k]||0)<3);return f.length?f:e}
 function actV(){return actE().map(([,x])=>x)}
+function endShow(){hush();G.ph='end';FX.burst(0xe3b54a,900);setTimeout(()=>FX.burst(0x33c7a6,700),700);setTimeout(()=>FX.burst(0x5c9bd6,700),1400);hRender();hPub();beep(523,.15);setTimeout(()=>beep(659,.15),160);setTimeout(()=>beep(784,.4),320);saveState();const r=actV().sort((a,b)=>b.s-a.s),top=r[0],last=r[r.length-1];say(top?`Und damit ist es entschieden! Gewinner von Kein Plan, Herr Berater: ${top.n}, mit ${top.s} Euro! Herzlichen Glückwunsch, du darfst morgen das Statusmeeting moderieren.`+(r.length>1?' '+pickLine(ROASTS,'kp-used-roast',{n:last.n}):''):'Das war Kein Plan, Herr Berater.')}
 function rankMap(){const m={},v=actE();v.forEach(([k,x])=>m[k]=1+v.filter(([,y])=>y.s>x.s).length);return m}
 function showBoard(s){
   if(cur()!==s||G.ph!=='rev')return;clearTimeout(autoT);G.ph='board';FX.mood('board');FX.pulse();hRender();hPub();beep(660,.08);setTimeout(()=>beep(880,.12),120);
@@ -301,9 +309,10 @@ function boardHtml(){
     return `<div class="brow${i===0?' lead':''}"><span class="bpos">${i+1}</span><span class="bname">${esc(x.n)}${mv>0?`<i class="up">▲${mv}</i>`:mv<0?`<i class="dn">▼${-mv}</i>`:''}</span><span class="bbar"><i style="width:${Math.max(2,Math.abs(x.s)/mx*100)}%;${x.s<0?'background:#ff7a6b':''}"></i></span><span class="bval">${eur(x.s)}</span><span class="bd ${d==null?'':d>=0?'pos':'neg'}">${d==null?'·':(d>=0?'+':'')+eur(d)}</span></div>`}).join('');
   return `<div class="board">${rows}</div>`;
 }
+$('#finb').onclick=()=>{if(!G||G.final)return;G.finalNext=true;$('#finb').classList.add('on');$('#finb').textContent='Finale kommt'};
 function hush(){try{speechSynthesis.cancel()}catch(e){}}
 $('#mute').onclick=()=>{muted=!muted;if(muted)hush();$('#mute').textContent=muted?'Ton aus':'Ton an'};
-function hostInit(reset){let st=null;try{st=JSON.parse(ls.get('kp-state')||'null')}catch(e){}if(reset||!st||Date.now()-st.t>8*3600e3)st=null;G={id:Math.random().toString(36).slice(2,7),step:-1,plan:[],scores:st?st.scores:{},done:st?st.done:[],n:st?st.n:0,restored:!!st,ans:{},ph:'lobby',last:{}};if(reset)saveState();hRender();hPub();loadPool()}
+function hostInit(reset){let st=null;try{st=JSON.parse(ls.get('kp-state')||'null')}catch(e){}if(reset||!st||Date.now()-st.t>8*3600e3)st=null;G={id:Math.random().toString(36).slice(2,7),step:-1,plan:[],scores:st?st.scores:{},done:st?st.done:[],n:st?st.n:0,restored:!!st,limit:st&&st.limit?st.limit:20,fdone:st&&st.fdone?st.fdone:[],ans:{},ph:'lobby',last:{}};if(reset)saveState();hRender();hPub();loadPool()}
 function newCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];return s}
 function hostNet(retry){
   if(!hasPeer){netErr='Die Verbindungsbibliothek konnte nicht geladen werden.';return hRender()}
@@ -336,7 +345,7 @@ function hCollect(){
     if(!G.scores[k]){G.scores[k]={n:p.name,s:0};hPubSoon()}
     if(G.ph==='q'&&p.r===rid&&Number.isInteger(p.a)&&!G.ans[k]){G.ans[k]={a:p.a,t:Date.now()-G.t0};beep(740,.05)}
   }
-  if(G.ph==='q'){const live=livePlayers().map(p=>key(p.name));if(live.length&&live.every(k=>G.ans[k]))hReveal()}
+  if(G.ph==='q'){const live=livePlayers().map(p=>key(p.name)).filter(k=>!(G.kick&&G.kick[k])&&((G.miss&&G.miss[k])||0)<3);if(live.length&&live.every(k=>G.ans[k]))hReveal()}
 }
 let pubT=null;function hPubSoon(){clearTimeout(pubT);pubT=setTimeout(hPub,50)}
 function cur(){return G.plan[G.step]}
@@ -347,12 +356,15 @@ function state(){
 }
 function sendTo(c){try{c.open&&c.send(state())}catch(e){}}
 function hPub(){if(!G)return;for(const x of conns.values())sendTo(x.c)}
-function hLabel(){const s=cur();if(G.ph==='lobby')return 'Lobby';if(G.ph==='end')return 'Endstand';if(G.ph==='wait')return 'Kurze Pause';if(!s)return '';if(s.k==='q')return `Frage ${s.n} · ${eur(s.val)}`;return 'Dis oder Dat'}
+function hLabel(){const s=cur();if(G.ph==='lobby')return 'Lobby';if(G.ph==='end')return 'Endstand';if(G.ph==='wait')return 'Kurze Pause';if(!s)return '';if(s.k==='q'&&s.fin)return 'Finale · Alles oder nichts';if(s.k==='q')return `Frage ${s.n} von ${G.limit} · ${eur(s.val)}`;if(s.k==='fi')return 'Finale';return 'Dis oder Dat'}
 function next(){
   hush();clearInterval(tick);clearTimeout(autoT);G.autoAt=0;G.last={};
   if(G.step+1>=G.plan.length&&!refill()){G.ph='wait';hRender();hPub();say('Kurze Pause. Ich hole neue Fragen aus dem Backlog. Holt euch was zu trinken.',true);loadPool();return}
-  G.step++;const s=cur();if(s.k!=='dd'&&!G.done.includes(s.id))G.done.push(s.id);
-  if(s.k==='q'){G.n++;s.n=G.n;s.val=G.n<=5?1000:G.n<=11?2000:3000}
+  if(!G.final&&(G.finalNext||G.n>=G.limit)){const c=cur();const inDD=c&&(c.k==='dd'||c.k==='ddi');if(!inDD){G.final=true;G.finalNext=false;const F=FINALS.find((f,i)=>!G.fdone.includes(i))||FINALS[0];G.fdone.push(FINALS.indexOf(F));G.plan.splice(G.step+1,0,{k:'fi',id:'fin-i'},Object.assign({k:'q',fin:1,id:'fin-q',val:0},F))}}
+  G.step++;const s=cur();if(s.k!=='dd'&&!s.fin&&s.k!=='fi'&&!G.done.includes(s.id))G.done.push(s.id);
+  if(s.k==='fi'){G.ph='fin';FX.burst(0xe3b54a,900);setTimeout(()=>FX.burst(0x8e84d8,700),600);hRender();hPub();say(FIN_I,true).then(()=>{if(cur()===s)next()});return}
+  if(s.k==='q'&&!s.fin){G.n++;s.n=G.n;s.val=G.n<=5?1000:G.n<=11?2000:3000}
+  if(s.fin){G.ph='read';hRender();hPub();say('Die Finalfrage. '+s.q,true).then(()=>{if(cur()===s&&G.ph==='read')ask(20)});return}
   if(s.k==='ddi'){FX.burst(0x8e84d8,700);G.ph='intro';hRender();hPub();say(curDD().i,true).then(()=>{if(cur()===s)next()});return}
   if(s.k==='dde'){G.ph='rev';hRender();hPub();say(curDD().end,true).then(()=>autoNext(s,2500));return}
   if(s.k==='dd'){say(s.t);ask(6);return}
@@ -367,13 +379,14 @@ function ask(sec){
 }
 function hReveal(){
   if(G.ph!=='q')return;clearInterval(tick);G.ph='rev';const s=cur();G.prevRank=rankMap();
-  for(const k in G.scores){const a=G.ans[k];if(!a){G.last[k]=null;continue}
+  const liveK=new Set(actE().map(([k])=>k));G.miss=G.miss||{};if(!s.fin)for(const p of livePlayers()){const k=key(p.name);G.miss[k]=G.ans[k]?0:(G.miss[k]||0)+1}
+  for(const k in G.scores){const a=G.ans[k];if(s.fin){if(!liveK.has(k))continue;const st=Math.max(G.scores[k].s,1000),okf=a&&a.a===s.c;const d=okf?st:-Math.max(G.scores[k].s,0)-(G.scores[k].s<=0?1000:0);G.scores[k].s+=d;G.last[k]=d;continue}if(!a){G.last[k]=null;continue}
     const ok=a.a===s.c;let d;
     if(s.k==='dd')d=ok?500:-500;else d=ok?Math.round(s.val*(.5+.5*Math.max(0,1-a.t/G.dur))/100)*100:-s.val/2;
     G.scores[k].s+=d;G.last[k]=d}
   saveState();hRender();hPub();
   const any=Object.values(G.ans).some(a=>a.a===s.c);FX.mood('rev');if(any){FX.burst(0xe3b54a,s.k==='dd'?220:600);fanfare()}else beep(196,.25);
-  if(s.k==='dd'){setTimeout(()=>{if(cur()===s)next()},2400)}else say(s.r,true).then(()=>{if(auto&&cur()===s&&G.ph==='rev')autoT=setTimeout(()=>showBoard(s),1200)});
+  if(s.fin){say(s.r,true).then(()=>setTimeout(()=>{if(cur()===s&&G.ph==='rev')endShow()},1500))}else if(s.k==='dd'){setTimeout(()=>{if(cur()===s)next()},2400)}else say(s.r,true).then(()=>{if(auto&&cur()===s&&G.ph==='rev')autoT=setTimeout(()=>showBoard(s),1200)});
 }
 function qrSvg(txt){try{const q=qrcode(0,'M');q.addData(txt);q.make();return q.createSvgTag({cellSize:6,margin:0,scalable:true})}catch(e){return ''}}
 function hRender(){
@@ -390,13 +403,15 @@ function hRender(){
       </div>
       <div class="players">${ps.length?ps.map(p=>`<div class="pl">${esc(p.name)}</div>`).join(''):'<div class="hint">Noch niemand da.</div>'}</div>
       <div class="meta">Stimme: <select id="vsel" class="ibtn" style="max-width:340px">${voices.map(v=>`<option${voice&&v.name===voice.name?' selected':''}>${esc(v.name)}</option>`).join('')||'<option>Standard</option>'}</select><button class="ibtn" id="vtest">Test</button></div>
-      <div class="meta">${POOL.length?`${freshCount()} neue Fragen bereit`:'Lade Fragen …'}${G.restored?` · Spielstand übernommen (${G.n} Fragen gespielt) <button class="ibtn" id="reset">Kontostände auf 0</button>`:''}</div>
+      <div class="meta">${POOL.length?`${freshCount()} neue Fragen bereit`:'Lade Fragen …'}· Finale nach Frage <button class="ibtn" id="lm">−5</button> <b>${G.limit}</b> <button class="ibtn" id="lp">+5</button>${G.restored?` · Spielstand übernommen (${G.n} Fragen gespielt) <button class="ibtn" id="reset">Kontostände auf 0</button>`:''}</div>
       <div><button class="btn" id="go" style="display:inline-block;padding:20px 40px">Show starten</button> <span class="hint">&nbsp;Danach läuft alles automatisch. P = Pause</span></div>`;
+  }else if(G.ph==='fin'){
+    st.innerHTML=`<div class="marq big">Finale: <em>Alles oder nichts</em></div><div class="quip">${esc(FIN_I)}</div>${boardHtml()}`;
   }else if(G.ph==='intro'){
     st.innerHTML=`<div class="marq big">Dis oder Dat</div><div class="qtext">${esc(curDD().opts.join(' oder '))}?</div><div class="quip">${esc(curDD().i)}</div>`;
   }else if(G.ph==='end'){
     const r=actV().sort((a,b)=>b.s-a.s);
-    st.innerHTML=`<div class="marq big">Endstand</div><div class="podium">${r.map((x,i)=>`<div><span>${i+1}. ${esc(x.n)}</span><span>${eur(x.s)}</span></div>`).join('')||'<div><span>Keine Handys dabei</span><span>Ehre: unbezahlbar</span></div>'}</div><div style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn" id="cont" style="padding:18px 36px">Weiterspielen</button><button class="btn ghost" id="again" style="padding:18px 30px">Neues Spiel, alles auf 0</button></div>`;
+    st.innerHTML=`<div class="marq big">${r.length?`Sieg für <em>${esc(r[0].n)}</em>`:'Endstand'}</div><div class="podium">${r.map((x,i)=>`<div><span>${i+1}. ${esc(x.n)}</span><span>${eur(x.s)}</span></div>`).join('')||'<div><span>Keine Handys dabei</span><span>Ehre: unbezahlbar</span></div>'}</div><div style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn" id="cont" style="padding:18px 36px">Weiterspielen</button><button class="btn ghost" id="again" style="padding:18px 30px">Neues Spiel, alles auf 0</button></div>`;
   }else if(G.ph==='wait'){
     st.innerHTML=`<div class="meta"><span class="pill">Kurze Pause</span><span>Kevin holt neue Fragen aus dem Backlog. Es geht automatisch weiter.</span></div>
       <div class="marq" style="font-size:clamp(30px,4vw,64px)">Zwischenstand</div>${boardHtml()}
@@ -426,18 +441,20 @@ function hRender(){
   }
   const vs=$('#vsel');if(vs){vs.onchange=()=>{ls.set('kp-voice',vs.value);pickVoice()};$('#vtest').onclick=()=>say('Willkommen bei Kein Plan, Herr Berater! Ich bin Kevin vom Helpdesk, und heute geht es um euren Tagessatz.')}
   const rs=$('#reset');if(rs)rs.onclick=()=>{if(G.ph==='lobby'){G.scores={};G.n=0;G.restored=false;for(const x of livePlayers())G.scores[key(x.name)]={n:x.name,s:0};saveState();hRender();hPub()}};
-  const sh=$('#showEnd');if(sh)sh.onclick=()=>{hush();G.ph='end';FX.burst(0xe3b54a,900);setTimeout(()=>FX.burst(0x33c7a6,700),700);setTimeout(()=>FX.burst(0x5c9bd6,700),1400);hRender();hPub();beep(523,.15);setTimeout(()=>beep(659,.15),160);setTimeout(()=>beep(784,.4),320);const top=actV().sort((a,b)=>b.s-a.s)[0];say(top?`Endstand! Gewinner des Abends: ${top.n}, mit ${top.s} Euro. Du darfst morgen das Statusmeeting moderieren.`:'Das war Kein Plan, Herr Berater.')};
-  const cn=$('#cont');if(cn)cn.onclick=()=>{G.ph='wait';next()};
+  const sh=$('#showEnd');if(sh)sh.onclick=endShow;
+  const lm=$('#lm'),lp=$('#lp');if(lm){lm.onclick=()=>{G.limit=Math.max(G.n+1,G.limit-5);saveState();hRender()};lp.onclick=()=>{G.limit+=5;saveState();hRender()}}
+  const cn=$('#cont');if(cn)cn.onclick=()=>{G.final=false;G.limit=G.n+15;G.ph='wait';next()};
   st.classList.toggle('fresh',fresh);
-  const go=$('#go');if(go)go.onclick=()=>{const c=cur();if(G.ph==='rev'&&c&&c.k==='q')showBoard(c);else next()};const ag=$('#again');if(ag)ag.onclick=()=>{hush();hostInit(true)};
+  const go=$('#go');if(go)go.onclick=()=>{const c=cur();if(G.ph==='rev'&&c&&c.fin)endShow();else if(G.ph==='rev'&&c&&c.k==='q')showBoard(c);else next()};const ag=$('#again');if(ag)ag.onclick=()=>{hush();hostInit(true)};
   hScore();
 }
 function hScore(){
   if(!G)return;const r=actE().sort((a,b)=>b[1].s-a[1].s);
-  $('#sbar').style.display=(G.ph==='board'||G.ph==='wait')?'none':'';$('#sbar').innerHTML=r.map(([k,x],i)=>{const d=G.last[k];return `<div class="sc ${G.ph==='q'&&G.ans[k]?'done':''}${i===0?' lead':''}"><b>${i+1}. ${esc(x.n)}</b><span>${eur(x.s)}</span>${G.ph==='rev'&&d!=null?`<em class="${d>=0?'pos':'neg'}">${d>=0?'+':''}${eur(d)}</em>`:''}</div>`}).join('')||'<span class="hint">Punktestand erscheint, sobald Handys verbunden sind.</span>';
+  $('#sbar').style.display=(G.ph==='board'||G.ph==='wait')?'none':'';$('#sbar').innerHTML=r.map(([k,x],i)=>{const d=G.last[k];return `<div class="sc ${G.ph==='q'&&G.ans[k]?'done':''}${i===0?' lead':''}" data-kick="${esc(k)}" title="Doppelklick: aus dem Spiel nehmen"><b>${i+1}. ${esc(x.n)}</b><span>${eur(x.s)}</span>${G.ph==='rev'&&d!=null?`<em class="${d>=0?'pos':'neg'}">${d>=0?'+':''}${eur(d)}</em>`:''}</div>`}).join('')||'<span class="hint">Punktestand erscheint, sobald Handys verbunden sind.</span>';
+  $('#sbar').querySelectorAll('[data-kick]').forEach(el=>el.ondblclick=()=>{G.kick=G.kick||{};G.kick[el.dataset.kick]=true;hScore();hPub()});
   const m=$('#cnt');if(m)m.textContent=`${Object.keys(G.ans).length} von ${livePlayers().length} haben geantwortet`;
 }
-document.addEventListener('keydown',e=>{if(mode!=='host')return;if(e.key==='p'||e.key==='P'){$('#pause').click();return}if(e.key==='Enter'||e.key===' '){const b=$('#go')||$('#again');if(b){e.preventDefault();b.click()}}});
+document.addEventListener('keydown',e=>{if(mode!=='host')return;if(e.key==='p'||e.key==='P'){$('#pause').click();return}if(e.key==='f'||e.key==='F'){$('#finb').click();return}if(e.key==='Enter'||e.key===' '){const b=$('#go')||$('#again');if(b){e.preventDefault();b.click()}}});
 
 /* ========== SPIELER ========== */
 let me=ls.get('kp-name')||'',showCode='',joined=false,host=null,myR=null,myA=null,pPeer=null,pConn=null,pState='',retryT=null;
@@ -478,6 +495,7 @@ function pRender(){
   const ph=host.ph,a=Array.isArray(host.a)?host.a:[];
   if(ph==='lobby'){b.innerHTML=`<div class="state">Du bist drin, ${esc(me)}.</div><p class="muted">Gleich geht's los. Schnell und richtig bringt am meisten.</p>${warn}`;return}
   if(ph==='end'){b.innerHTML=`<div class="state">${m?`Platz ${m.rank} von ${m.of}`:'Show vorbei'}</div><p class="ptimer">${m?eur(m.s):''}</p><p class="muted">Danke fürs Mitspielen.</p>`;return}
+  if(ph==='fin'){b.innerHTML=`<div class="state">Finale!</div><p class="ptimer">Alles oder nichts</p><p>Dein Einsatz: <b>${m?eur(Math.max(m.s,1000)):'1.000 €'}</b>. Richtig verdoppelt, falsch ist alles weg.</p>${warn}`;return}
   if(ph==='intro'){b.innerHTML=`<div class="state">Dis oder Dat!</div><p class="muted">Sechs Sekunden pro Name. Schau auf den Fernseher.</p>${warn}`;return}
   if(ph==='read'){b.innerHTML=`<p class="muted">${esc(host.lab)}</p><div class="state" style="font-size:24px">${esc(host.t)}</div><p class="muted">Hör zu, gleich darfst du drücken.</p>${warn}`;return}
   if(ph==='q'){
