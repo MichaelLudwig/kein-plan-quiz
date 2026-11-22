@@ -97,6 +97,19 @@ input:focus-visible{outline:2px solid var(--y)}
 .code{font:600 clamp(40px,6vw,96px)/1 'IBM Plex Mono',monospace;color:var(--y);letter-spacing:.08em}
 .mini{font-family:'IBM Plex Mono',monospace;color:var(--y);font-size:clamp(14px,1.4vw,20px)}
 .auto{font:500 14px 'IBM Plex Mono',monospace;color:var(--soft)}
+.board{display:grid;gap:8px;max-width:1300px}
+.brow{display:grid;grid-template-columns:2.2em minmax(6em,14em) 1fr auto 7em;gap:16px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:clamp(6px,1.1vh,14px) 18px;font:600 clamp(16px,min(2vw,3.4vh),32px) 'IBM Plex Sans',sans-serif}
+.brow.lead{border-color:var(--y);box-shadow:0 0 30px rgba(227,181,74,.18)}
+.bpos{font:700 1.1em 'IBM Plex Mono',monospace;color:var(--y)}
+.bname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bname i{font-style:normal;font:600 .6em 'IBM Plex Mono',monospace;margin-left:10px}
+.up{color:var(--a1)}.dn{color:#ff7a6b}
+.bbar{height:.55em;background:rgba(127,166,216,.12)}
+.bbar i{display:block;height:100%;background:var(--y);transition:width .8s ease}
+.bval{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.bd{font:600 .7em 'IBM Plex Mono',monospace;text-align:right;white-space:nowrap;color:var(--soft)}
+.sc.lead{border-color:var(--y);background:var(--panel2)}
+.sc span{font-size:22px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
@@ -178,7 +191,23 @@ function say(txt,wait){
 }
 let auto=true,autoT=null;
 function autoNext(s,ms){clearTimeout(autoT);if(!auto)return;G.autoAt=Date.now()+ms;hRender();autoT=setTimeout(()=>{if(auto&&cur()===s&&G.ph==='rev')next()},ms)}
-$('#pause').onclick=()=>{auto=!auto;$('#pause').textContent=auto?'Auto an':'Auto aus';$('#pause').classList.toggle('on',!auto);if(!auto){clearTimeout(autoT);G&&(G.autoAt=0);G&&hRender()}else if(G&&G.ph==='rev'&&cur())autoNext(cur(),1500)};
+$('#pause').onclick=()=>{auto=!auto;$('#pause').textContent=auto?'Auto an':'Auto aus';$('#pause').classList.toggle('on',!auto);if(!auto){clearTimeout(autoT);G&&(G.autoAt=0);G&&hRender()}else if(G&&cur()&&G.ph==='rev'){const s=cur();s.k==='q'?(autoT=setTimeout(()=>showBoard(s),1500)):autoNext(s,1500)}else if(G&&cur()&&G.ph==='board'){const s=cur();autoT=setTimeout(()=>{if(cur()===s&&G.ph==='board')next()},1500)}};
+function rankMap(){const m={};Object.entries(G.scores).sort((a,b)=>b[1].s-a[1].s).forEach(([k],i)=>m[k]=i+1);return m}
+function showBoard(s){
+  if(cur()!==s||G.ph!=='rev')return;clearTimeout(autoT);G.ph='board';hRender();hPub();beep(660,.08);setTimeout(()=>beep(880,.12),120);
+  const r=Object.values(G.scores).sort((a,b)=>b.s-a.s);let line='Zwischenstand.';
+  if(r.length>1){const top=r[0],last=r[r.length-1],gap=top.s-r[1].s;line=`${top.n} führt mit ${top.s} Euro${gap>0?`, ${gap} Euro vor ${r[1].n}`:', aber punktgleich mit '+r[1].n}. ${last.n}, das ist ein Fall für die Lessons Learned.`}
+  else if(r.length===1)line=`${r[0].n} hat ${r[0].s} Euro. Gegen sich selbst gewinnt man immer.`;
+  G.boardLine=line;hRender();
+  say(line,true).then(()=>{if(auto&&cur()===s&&G.ph==='board')autoT=setTimeout(()=>{if(auto&&cur()===s&&G.ph==='board')next()},2500)});
+}
+function boardHtml(){
+  const r=Object.entries(G.scores).sort((a,b)=>b[1].s-a[1].s),pr=G.prevRank||{};const mx=Math.max(1,...r.map(([k,x])=>Math.abs(x.s)));
+  if(!r.length)return '<div class="hint">Noch keine Spieler verbunden.</div>';
+  const rows=r.map(([k,x],i)=>{const d=G.last[k],mv=pr[k]?pr[k]-(i+1):0;
+    return `<div class="brow${i===0?' lead':''}"><span class="bpos">${i+1}</span><span class="bname">${esc(x.n)}${mv>0?`<i class="up">▲${mv}</i>`:mv<0?`<i class="dn">▼${-mv}</i>`:''}</span><span class="bbar"><i style="width:${Math.max(2,Math.abs(x.s)/mx*100)}%;${x.s<0?'background:#ff7a6b':''}"></i></span><span class="bval">${eur(x.s)}</span><span class="bd ${d==null?'':d>=0?'pos':'neg'}">${d==null?'·':(d>=0?'+':'')+eur(d)}</span></div>`}).join('');
+  return `<div class="board">${rows}</div>`;
+}
 function hush(){try{speechSynthesis.cancel()}catch(e){}}
 $('#mute').onclick=()=>{muted=!muted;if(muted)hush();$('#mute').textContent=muted?'Ton aus':'Ton an'};
 function buildPlan(){
@@ -250,14 +279,14 @@ function ask(sec){
   hCollect();
 }
 function hReveal(){
-  if(G.ph!=='q')return;clearInterval(tick);G.ph='rev';const s=cur();
+  if(G.ph!=='q')return;clearInterval(tick);G.ph='rev';const s=cur();G.prevRank=rankMap();
   for(const k in G.scores){const a=G.ans[k];if(!a){G.last[k]=null;continue}
     const ok=a.a===s.c;let d;
     if(s.k==='dd')d=ok?500:-500;else d=ok?Math.round(s.val*(.5+.5*Math.max(0,1-a.t/G.dur))/100)*100:-s.val/2;
     G.scores[k].s+=d;G.last[k]=d}
   hRender();hPub();
   const any=Object.values(G.ans).some(a=>a.a===s.c);beep(any?988:196,.25);
-  if(s.k==='dd'){setTimeout(()=>{if(cur()===s)next()},2400)}else say(s.r,true).then(()=>autoNext(s,3500));
+  if(s.k==='dd'){setTimeout(()=>{if(cur()===s)next()},2400)}else say(s.r,true).then(()=>{if(auto&&cur()===s&&G.ph==='rev')autoT=setTimeout(()=>showBoard(s),1200)});
 }
 function qrSvg(txt){try{const q=qrcode(0,'M');q.addData(txt);q.make();return q.createSvgTag({cellSize:6,margin:0,scalable:true})}catch(e){return ''}}
 function hRender(){
@@ -278,6 +307,12 @@ function hRender(){
   }else if(G.ph==='end'){
     const r=Object.values(G.scores).sort((a,b)=>b.s-a.s);
     st.innerHTML=`<div class="marq big">Endstand</div><div class="podium">${r.map((x,i)=>`<div><span>${i+1}. ${esc(x.n)}</span><span>${eur(x.s)}</span></div>`).join('')||'<div><span>Keine Handys dabei</span><span>Ehre: unbezahlbar</span></div>'}</div><div><button class="btn" id="again" style="display:inline-block;padding:18px 36px">Neue Show</button></div>`;
+  }else if(G.ph==='board'){
+    const r=Object.values(G.scores).sort((a,b)=>b.s-a.s);
+    st.innerHTML=`<div class="meta"><span class="pill">Kontostand nach Frage ${s.n} von ${s.of}</span>${r.length>1?`<span>Abstand Platz 1 zu 2: ${eur(r[0].s-r[1].s)}</span>`:''}</div>
+      <div class="marq" style="font-size:clamp(30px,4vw,64px)">Wer hat den höchsten <em>Tagessatz</em>?</div>${boardHtml()}
+      ${G.boardLine?`<div class="quip">${esc(G.boardLine)}</div>`:''}
+      <div style="display:flex;gap:14px;align-items:center"><button class="btn" id="go" style="padding:16px 30px">${G.step+1<G.plan.length?'Nächste Frage':'Zum Endstand'}</button><span class="auto">${auto?'geht automatisch weiter':'Auto aus: Leertaste'}</span></div>`;
   }else if(s.k==='dde'){
     st.innerHTML=`<div class="marq big">Dis oder Dat: vorbei</div><div class="quip">Manche von euch sollten über einen Jobwechsel zu Nintendo nachdenken.</div><div><button class="btn" id="go" style="display:inline-block;padding:18px 36px">Weiter</button></div>`;
   }else{
@@ -295,12 +330,12 @@ function hRender(){
         ${rev?`<div style="display:flex;gap:2vw;align-items:center;flex-wrap:wrap"><div class="quip" style="flex:1 1 420px">${esc(s.r)}</div><div style="flex:none;display:grid;gap:6px;justify-items:center"><button class="btn" id="go" style="padding:18px 32px">${G.step+1<G.plan.length?'Nächste Frage':'Zum Endstand'}</button><span class="auto">${auto?'geht automatisch weiter':'Auto aus: Leertaste'}</span></div></div>`:''}`;
     }
   }
-  const go=$('#go');if(go)go.onclick=next;const ag=$('#again');if(ag)ag.onclick=()=>{hush();hostInit()};
+  const go=$('#go');if(go)go.onclick=()=>{const c=cur();if(G.ph==='rev'&&c&&c.k==='q')showBoard(c);else next()};const ag=$('#again');if(ag)ag.onclick=()=>{hush();hostInit()};
   hScore();
 }
 function hScore(){
   if(!G)return;const r=Object.entries(G.scores).sort((a,b)=>b[1].s-a[1].s);
-  $('#sbar').innerHTML=r.map(([k,x])=>{const d=G.last[k];return `<div class="sc ${G.ph==='q'&&G.ans[k]?'done':''}"><b>${esc(x.n)}</b><span>${eur(x.s)}</span>${G.ph==='rev'&&d!=null?`<em class="${d>=0?'pos':'neg'}">${d>=0?'+':''}${eur(d)}</em>`:''}</div>`}).join('')||'<span class="hint">Punktestand erscheint, sobald Handys verbunden sind.</span>';
+  $('#sbar').style.display=G.ph==='board'?'none':'';$('#sbar').innerHTML=r.map(([k,x],i)=>{const d=G.last[k];return `<div class="sc ${G.ph==='q'&&G.ans[k]?'done':''}${i===0?' lead':''}"><b>${i+1}. ${esc(x.n)}</b><span>${eur(x.s)}</span>${G.ph==='rev'&&d!=null?`<em class="${d>=0?'pos':'neg'}">${d>=0?'+':''}${eur(d)}</em>`:''}</div>`}).join('')||'<span class="hint">Punktestand erscheint, sobald Handys verbunden sind.</span>';
   const m=$('#cnt');if(m)m.textContent=`${Object.keys(G.ans).length} von ${livePlayers().length} haben geantwortet`;
 }
 document.addEventListener('keydown',e=>{if(mode!=='host')return;if(e.key==='p'||e.key==='P'){$('#pause').click();return}if(e.key==='Enter'||e.key===' '){const b=$('#go')||$('#again');if(b){e.preventDefault();b.click()}}});
@@ -352,6 +387,11 @@ function pRender(){
       ${host.k==='dd'?`<div class="state" style="text-align:center">${esc(host.t)}</div>`:''}
       <div class="buzz">${a.map((t,i)=>`<button class="bz ${host.k==='dd'?'dd2':''}" data-i="${i}" style="background:${ACOL[i]}">${host.k==='dd'?'':`<span class="l">${LET[i]}</span>`}<span>${esc(t)}</span></button>`).join('')}</div>${warn}`;
     b.querySelectorAll('.bz').forEach(x=>x.onclick=()=>pAnswer(+x.dataset.i));return;
+  }
+  if(ph==='board'){
+    const sc=Array.isArray(host.sc)?host.sc:[];const ahead=m&&m.rank>1?sc[m.rank-2]:null;
+    b.innerHTML=`<p class="muted">Zwischenstand</p><div class="state">${m?`Platz ${m.rank} von ${m.of}`:'Zwischenstand'}</div><p class="ptimer">${m?eur(m.s):'0 €'}</p>
+      ${m&&m.rank===1?'<p>Du führst. Jetzt bloß nicht nachlassen.</p>':ahead?`<p>Noch <b>${eur(ahead[1]-m.s)}</b> bis Platz ${m.rank-1} (${esc(ahead[0])}).</p>`:''}${warn}`;return;
   }
   if(ph==='rev'){
     if(host.c==null){b.innerHTML=`<div class="state">Zwischenstand</div><p class="ptimer">${m?eur(m.s):''}</p><p class="muted">${m?`Platz ${m.rank} von ${m.of}`:''}</p>`;return}
