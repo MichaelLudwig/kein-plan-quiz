@@ -46,6 +46,7 @@ input:focus-visible{outline:2px solid var(--y)}
 .ibtn{all:unset;cursor:pointer;font:500 14px 'IBM Plex Mono',monospace;padding:8px 12px;border-radius:3px;border:1px solid var(--line);color:var(--soft)}
 .ibtn:focus-visible{outline:2px solid var(--y)}
 .ibtn.on{border-color:var(--y);color:var(--y)}
+select.ibtn{all:revert;font:500 14px 'IBM Plex Mono',monospace;padding:8px 10px;border-radius:3px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
 .stagebox{flex:1;display:flex;flex-direction:column;justify-content:center;padding:1.5vh 4vw 2vh;gap:2vh}
 .tbarline{height:6px;background:var(--line);border-radius:0;overflow:hidden}
 .tbarline i{display:block;height:100%;background:var(--y);width:100%;transition:width .25s linear}
@@ -202,13 +203,14 @@ let G=null,muted=false,tick=null,beepCtx=null,peer=null,code=null,netOk=false,ne
 const conns=new Map();
 function beep(f,d){try{beepCtx=beepCtx||new (window.AudioContext||window.webkitAudioContext)();const o=beepCtx.createOscillator(),g=beepCtx.createGain();o.frequency.value=f;g.gain.value=.12;o.connect(g);g.connect(beepCtx.destination);o.start();o.stop(beepCtx.currentTime+d)}catch(e){}}
 let voice=null;
-function pickVoice(){try{const v=speechSynthesis.getVoices().filter(v=>/^de/i.test(v.lang));voice=v.find(x=>/google/i.test(x.name))||v[0]||null}catch(e){}}
+let voices=[];
+function pickVoice(){try{voices=speechSynthesis.getVoices().filter(v=>/^de/i.test(v.lang));const want=ls.get('kp-voice');const nat=voices.filter(x=>/natural|online|neural/i.test(x.name));voice=voices.find(x=>x.name===want)||nat.find(x=>/conrad|killian|florian/i.test(x.name))||nat[0]||voices.find(x=>/google/i.test(x.name))||voices[0]||null;if(G&&G.ph==='lobby')hRender()}catch(e){}}
 try{pickVoice();speechSynthesis.onvoiceschanged=pickVoice}catch(e){}
 function say(txt,wait){
   const est=Math.min(14000,1500+txt.split(' ').length*330);
   if(muted||!window.speechSynthesis)return new Promise(r=>setTimeout(r,wait?Math.min(9000,est):0));
   return new Promise(res=>{let done=false;const fin=()=>{if(!done){done=true;res()}};
-    try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='de-DE';if(voice)u.voice=voice;u.rate=1.05;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){fin()}
+    try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='de-DE';if(voice)u.voice=voice;u.rate=1.08;u.onend=fin;u.onerror=fin;speechSynthesis.speak(u)}catch(e){fin()}
     setTimeout(fin,est+4000)});
 }
 let auto=true,autoT=null;
@@ -323,6 +325,7 @@ function hRender(){
         <div class="hint" style="max-width:34ch;margin-top:8px">${netOk?'Schnelle richtige Antworten bringen mehr Tagessatz, falsche kosten die Hälfte.':esc(netErr||'Verbinde mit dem Vermittlungsserver …')}</div></div>
       </div>
       <div class="players">${ps.length?ps.map(p=>`<div class="pl">${esc(p.name)}</div>`).join(''):'<div class="hint">Noch niemand da.</div>'}</div>
+      <div class="meta">Stimme: <select id="vsel" class="ibtn" style="max-width:340px">${voices.map(v=>`<option${voice&&v.name===voice.name?' selected':''}>${esc(v.name)}</option>`).join('')||'<option>Standard</option>'}</select><button class="ibtn" id="vtest">Test</button></div>
       <div class="meta">Fragen: ${PACKS.map((P,i)=>`<button class="ibtn${i===packIdx?' on':''}" data-pack="${i}">${P.n}</button>`).join(' ')}</div>
       <div><button class="btn" id="go" style="display:inline-block;padding:20px 40px">Show starten</button> <span class="hint">&nbsp;Danach läuft alles automatisch. P = Pause</span></div>`;
   }else if(G.ph==='intro'){
@@ -353,6 +356,7 @@ function hRender(){
         ${rev?`<div style="display:flex;gap:2vw;align-items:center;flex-wrap:wrap"><div class="quip" style="flex:1 1 420px">${esc(s.r)}</div><div style="flex:none;display:grid;gap:6px;justify-items:center"><button class="btn" id="go" style="padding:18px 32px">${G.step+1<G.plan.length?'Nächste Frage':'Zum Endstand'}</button><span class="auto">${auto?'geht automatisch weiter':'Auto aus: Leertaste'}</span></div></div>`:''}`;
     }
   }
+  const vs=$('#vsel');if(vs){vs.onchange=()=>{ls.set('kp-voice',vs.value);pickVoice()};$('#vtest').onclick=()=>say('Willkommen bei Kein Plan, Herr Berater! Ich bin Kevin vom Helpdesk, und heute geht es um euren Tagessatz.')}
   document.querySelectorAll('[data-pack]').forEach(b=>b.onclick=()=>{packIdx=+b.dataset.pack;G.plan=buildPlan();hRender()});
   const go=$('#go');if(go)go.onclick=()=>{const c=cur();if(G.ph==='rev'&&c&&c.k==='q')showBoard(c);else next()};const ag=$('#again');if(ag)ag.onclick=()=>{hush();hostInit()};
   hScore();
