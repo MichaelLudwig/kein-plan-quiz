@@ -283,17 +283,19 @@ function say(txt,wait){
 let auto=true,autoT=null;
 function autoNext(s,ms){clearTimeout(autoT);if(!auto)return;G.autoAt=Date.now()+ms;hRender();autoT=setTimeout(()=>{if(auto&&cur()===s&&G.ph==='rev')next()},ms)}
 $('#pause').onclick=()=>{auto=!auto;$('#pause').textContent=auto?'Auto an':'Auto aus';$('#pause').classList.toggle('on',!auto);if(!auto){clearTimeout(autoT);G&&(G.autoAt=0);G&&hRender()}else if(G&&cur()&&G.ph==='rev'){const s=cur();s.k==='q'?(autoT=setTimeout(()=>showBoard(s),1500)):autoNext(s,1500)}else if(G&&cur()&&G.ph==='board'){const s=cur();autoT=setTimeout(()=>{if(cur()===s&&G.ph==='board')next()},1500)}};
-function rankMap(){const m={},v=Object.entries(G.scores);v.forEach(([k,x])=>m[k]=1+v.filter(([,y])=>y.s>x.s).length);return m}
+function actE(){const live=new Set(livePlayers().map(p=>key(p.name)));const e=Object.entries(G.scores);const f=e.filter(([k])=>live.has(k));return f.length?f:e}
+function actV(){return actE().map(([,x])=>x)}
+function rankMap(){const m={},v=actE();v.forEach(([k,x])=>m[k]=1+v.filter(([,y])=>y.s>x.s).length);return m}
 function showBoard(s){
   if(cur()!==s||G.ph!=='rev')return;clearTimeout(autoT);G.ph='board';FX.mood('board');FX.pulse();hRender();hPub();beep(660,.08);setTimeout(()=>beep(880,.12),120);
-  saveState();const r=Object.values(G.scores).sort((a,b)=>b.s-a.s);let line='Zwischenstand.';
+  saveState();const r=actV().sort((a,b)=>b.s-a.s);let line='Zwischenstand.';
   if(r.length>1){const top=r[0],last=r[r.length-1],gap=top.s-r[1].s;line=(gap>0?pickLine(LEADS,'kp-used-lead',{n:top.n,s:top.s,gap,m:r[1].n}):`${top.n} und ${r[1].n} liegen gleichauf mit ${top.s} Euro. Das klären wir im nächsten Meeting.`)+' '+pickLine(ROASTS,'kp-used-roast',{n:last.n})}
   else if(r.length===1)line=`${r[0].n} hat ${r[0].s} Euro. Gegen sich selbst gewinnt man immer.`;
   G.boardLine=line;hRender();
   say(line,true).then(()=>{if(auto&&cur()===s&&G.ph==='board')autoT=setTimeout(()=>{if(auto&&cur()===s&&G.ph==='board')next()},2500)});
 }
 function boardHtml(){
-  const r=Object.entries(G.scores).sort((a,b)=>b[1].s-a[1].s),pr=G.prevRank||{};const mx=Math.max(1,...r.map(([k,x])=>Math.abs(x.s)));
+  const r=actE().sort((a,b)=>b[1].s-a[1].s),pr=G.prevRank||{};const mx=Math.max(1,...r.map(([k,x])=>Math.abs(x.s)));
   if(!r.length)return '<div class="hint">Noch keine Spieler verbunden.</div>';
   const rows=r.map(([k,x],i)=>{const d=G.last[k],nr=1+r.filter(([,y])=>y.s>x.s).length,mv=pr[k]?pr[k]-nr:0;
     return `<div class="brow${i===0?' lead':''}"><span class="bpos">${i+1}</span><span class="bname">${esc(x.n)}${mv>0?`<i class="up">▲${mv}</i>`:mv<0?`<i class="dn">▼${-mv}</i>`:''}</span><span class="bbar"><i style="width:${Math.max(2,Math.abs(x.s)/mx*100)}%;${x.s<0?'background:#ff7a6b':''}"></i></span><span class="bval">${eur(x.s)}</span><span class="bd ${d==null?'':d>=0?'pos':'neg'}">${d==null?'·':(d>=0?'+':'')+eur(d)}</span></div>`}).join('');
@@ -340,7 +342,7 @@ let pubT=null;function hPubSoon(){clearTimeout(pubT);pubT=setTimeout(hPub,50)}
 function cur(){return G.plan[G.step]}
 function state(){
   const s=cur()||{};
-  const sc=Object.values(G.scores).sort((a,b)=>b.s-a.s).slice(0,40).map(x=>[x.n,x.s,G.last[key(x.n)]==null?null:G.last[key(x.n)]]);
+  const sc=actV().sort((a,b)=>b.s-a.s).slice(0,40).map(x=>[x.n,x.s,G.last[key(x.n)]==null?null:G.last[key(x.n)]]);
   return {role:'host',g:G.id,ph:G.ph,r:G.id+'-'+G.step,k:s.k||'',lab:hLabel(),t:s.k==='q'?s.q:s.k==='dd'?s.t:'',a:s.a||[],left:G.left||0,c:G.ph==='rev'&&s.c!=null?s.c:null,sc};
 }
 function sendTo(c){try{c.open&&c.send(state())}catch(e){}}
@@ -393,14 +395,14 @@ function hRender(){
   }else if(G.ph==='intro'){
     st.innerHTML=`<div class="marq big">Dis oder Dat</div><div class="qtext">${esc(curDD().opts.join(' oder '))}?</div><div class="quip">${esc(curDD().i)}</div>`;
   }else if(G.ph==='end'){
-    const r=Object.values(G.scores).sort((a,b)=>b.s-a.s);
+    const r=actV().sort((a,b)=>b.s-a.s);
     st.innerHTML=`<div class="marq big">Endstand</div><div class="podium">${r.map((x,i)=>`<div><span>${i+1}. ${esc(x.n)}</span><span>${eur(x.s)}</span></div>`).join('')||'<div><span>Keine Handys dabei</span><span>Ehre: unbezahlbar</span></div>'}</div><div style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn" id="cont" style="padding:18px 36px">Weiterspielen</button><button class="btn ghost" id="again" style="padding:18px 30px">Neues Spiel, alles auf 0</button></div>`;
   }else if(G.ph==='wait'){
     st.innerHTML=`<div class="meta"><span class="pill">Kurze Pause</span><span>Kevin holt neue Fragen aus dem Backlog. Es geht automatisch weiter.</span></div>
       <div class="marq" style="font-size:clamp(30px,4vw,64px)">Zwischenstand</div>${boardHtml()}
       <div style="display:flex;gap:12px"><button class="btn" id="showEnd" style="padding:16px 30px">Endstand zeigen</button></div>`;
   }else if(G.ph==='board'){
-    const r=Object.values(G.scores).sort((a,b)=>b.s-a.s);
+    const r=actV().sort((a,b)=>b.s-a.s);
     st.innerHTML=`<div class="meta"><span class="pill">Kontostand nach Frage ${s.n}</span>${r.length>1?`<span>Abstand Platz 1 zu 2: ${eur(r[0].s-r[1].s)}</span>`:''}</div>
       <div class="marq" style="font-size:clamp(30px,4vw,64px)">Wer hat den höchsten <em>Tagessatz</em>?</div>${boardHtml()}
       ${G.boardLine?`<div class="quip">${esc(G.boardLine)}</div>`:''}
@@ -424,14 +426,14 @@ function hRender(){
   }
   const vs=$('#vsel');if(vs){vs.onchange=()=>{ls.set('kp-voice',vs.value);pickVoice()};$('#vtest').onclick=()=>say('Willkommen bei Kein Plan, Herr Berater! Ich bin Kevin vom Helpdesk, und heute geht es um euren Tagessatz.')}
   const rs=$('#reset');if(rs)rs.onclick=()=>{if(G.ph==='lobby'){G.scores={};G.n=0;G.restored=false;for(const x of livePlayers())G.scores[key(x.name)]={n:x.name,s:0};saveState();hRender();hPub()}};
-  const sh=$('#showEnd');if(sh)sh.onclick=()=>{hush();G.ph='end';FX.burst(0xe3b54a,900);setTimeout(()=>FX.burst(0x33c7a6,700),700);setTimeout(()=>FX.burst(0x5c9bd6,700),1400);hRender();hPub();beep(523,.15);setTimeout(()=>beep(659,.15),160);setTimeout(()=>beep(784,.4),320);const top=Object.values(G.scores).sort((a,b)=>b.s-a.s)[0];say(top?`Endstand! Gewinner des Abends: ${top.n}, mit ${top.s} Euro. Du darfst morgen das Statusmeeting moderieren.`:'Das war Kein Plan, Herr Berater.')};
+  const sh=$('#showEnd');if(sh)sh.onclick=()=>{hush();G.ph='end';FX.burst(0xe3b54a,900);setTimeout(()=>FX.burst(0x33c7a6,700),700);setTimeout(()=>FX.burst(0x5c9bd6,700),1400);hRender();hPub();beep(523,.15);setTimeout(()=>beep(659,.15),160);setTimeout(()=>beep(784,.4),320);const top=actV().sort((a,b)=>b.s-a.s)[0];say(top?`Endstand! Gewinner des Abends: ${top.n}, mit ${top.s} Euro. Du darfst morgen das Statusmeeting moderieren.`:'Das war Kein Plan, Herr Berater.')};
   const cn=$('#cont');if(cn)cn.onclick=()=>{G.ph='wait';next()};
   st.classList.toggle('fresh',fresh);
   const go=$('#go');if(go)go.onclick=()=>{const c=cur();if(G.ph==='rev'&&c&&c.k==='q')showBoard(c);else next()};const ag=$('#again');if(ag)ag.onclick=()=>{hush();hostInit(true)};
   hScore();
 }
 function hScore(){
-  if(!G)return;const r=Object.entries(G.scores).sort((a,b)=>b[1].s-a[1].s);
+  if(!G)return;const r=actE().sort((a,b)=>b[1].s-a[1].s);
   $('#sbar').style.display=(G.ph==='board'||G.ph==='wait')?'none':'';$('#sbar').innerHTML=r.map(([k,x],i)=>{const d=G.last[k];return `<div class="sc ${G.ph==='q'&&G.ans[k]?'done':''}${i===0?' lead':''}"><b>${i+1}. ${esc(x.n)}</b><span>${eur(x.s)}</span>${G.ph==='rev'&&d!=null?`<em class="${d>=0?'pos':'neg'}">${d>=0?'+':''}${eur(d)}</em>`:''}</div>`}).join('')||'<span class="hint">Punktestand erscheint, sobald Handys verbunden sind.</span>';
   const m=$('#cnt');if(m)m.textContent=`${Object.keys(G.ans).length} von ${livePlayers().length} haben geantwortet`;
 }
