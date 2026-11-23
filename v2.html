@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kein Plan, Herr Berater</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: Kioptra-Abend: präzise, technisch, mit einem Augenzwinkern
+   IDEA: ein ruhiges TV-Studio im Kioptra-Look: Raster, Monospace-Labels, goldene Akzente, Licht von oben
+   PICTURE: Frage groß auf dunklem Raster, vier Antwortkacheln mit Farbcode, Countdown-Ring in Gold, Podest am Ende
+   COLOUR and TYPE: Kioptra-Navy, Gold #e3b54a, Teal, Blau, Lavendel; IBM Plex Sans und IBM Plex Mono
+   LAYOUT: TV: Kopfzeile mit Logo, Bühne, Punkteleiste; Handy: eine Spalte, große Buzzer
+   MOTION: nichts blinkt dauerhaft. Bewegung nur kurz bei Ereignissen, Lichtkegel schwenken langsam */
+:root{color-scheme:dark;--bg:#0a1422;--panel:#0f1c2e;--panel2:#14263d;--line:rgba(127,166,216,.16);--line2:rgba(127,166,216,.3);--y:#e3b54a;--y2:#f3d488;--ink:#eef3fb;--soft:#aeb9c9;--a0:#e3b54a;--a1:#33c7a6;--a2:#5c9bd6;--a3:#8e84d8;--dark:#0a1422;--bad:#ff7a6b;--red:#e3b54a;--ease:cubic-bezier(.2,.8,.2,1)}
+*{box-sizing:border-box;min-width:0}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 'IBM Plex Sans',system-ui,sans-serif;overflow-x:clip;-webkit-tap-highlight-color:transparent;background-image:radial-gradient(70% 50% at 50% 0%,rgba(63,118,189,.22),transparent 70%),linear-gradient(rgba(127,166,216,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(127,166,216,.07) 1px,transparent 1px);background-size:100% 100%,48px 48px,48px 48px}
+button{font:inherit}
+.marq{font-family:'IBM Plex Sans',sans-serif;font-weight:700;line-height:1.05;color:var(--ink);letter-spacing:-.01em}
+.marq em{font-style:normal;color:var(--y)}
+.mono{font-family:'IBM Plex Mono',monospace}
+.logo{display:inline-flex;align-items:center;gap:10px}
+.logo svg{height:28px;width:auto;flex:none}
+.wrap{max-width:560px;margin:0 auto;padding:22px 16px 40px}
+.btn{all:unset;cursor:pointer;display:block;text-align:center;background:linear-gradient(180deg,var(--y2),var(--y) 55%);color:var(--dark);font:700 19px/1 'IBM Plex Sans',sans-serif;padding:18px 22px;border-radius:3px;letter-spacing:.02em;box-shadow:0 8px 26px rgba(227,181,74,.18)}
+.btn:hover{filter:brightness(1.08)}.btn:active{transform:translateY(2px)}
+.btn:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line2);font-size:16px;box-shadow:none}
+input{width:100%;font:600 21px 'IBM Plex Sans',sans-serif;padding:15px;border-radius:3px;border:1px solid var(--y);background:var(--panel);color:var(--ink)}
+input:focus-visible{outline:2px solid var(--y)}
+.muted{color:var(--soft);font-size:15px}
+.warn{background:rgba(227,181,74,.1);border:1px solid rgba(227,181,74,.4);border-radius:3px;padding:12px 14px;font-size:15px;margin-top:16px}
+#pick .marq{font-size:clamp(38px,10vw,68px);margin:22px 0 12px;text-wrap:balance}
+#pick .roles{display:grid;gap:14px;margin-top:26px}
+.role{all:unset;cursor:pointer;display:block;background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--y);border-radius:3px;padding:18px 20px}
+.role:focus-visible{outline:2px solid var(--y);outline-offset:3px}
+.role b{display:block;font:700 22px/1.2 'IBM Plex Sans',sans-serif}
+.role span{color:var(--soft);font-size:15px}
+.role.alt{border-left-color:var(--a1)}
+
+/* ---------- TV: Rahmen ---------- */
+#tv{display:none;min-height:100vh;flex-direction:column;position:relative;z-index:1}
+#tv.on{display:flex}
+#tv::before,#tv::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none}
+#tv::before{background:radial-gradient(120% 95% at 50% 42%,transparent 52%,rgba(3,8,16,.72))}
+#tv::after{background:radial-gradient(62% 44% at 50% 0%,rgba(227,181,74,.15),transparent 72%);opacity:.45;transition:opacity .9s ease}
+body[data-ph=read] #tv::after{opacity:.6}body[data-ph=q] #tv::after{opacity:.3}
+body[data-ph=rev] #tv::after,body[data-ph=board] #tv::after{opacity:.85}body[data-ph=end] #tv::after{opacity:1}
+.tbar{display:flex;align-items:center;gap:16px;padding:14px 3vw;border-bottom:1px solid var(--line);background:rgba(10,20,34,.75);box-shadow:0 1px 0 rgba(227,181,74,.1)}
+.tbar .marq{font-size:clamp(15px,1.5vw,20px);font-weight:600}
+.tbar .lab{margin-left:auto;font:500 clamp(13px,1.3vw,18px) 'IBM Plex Mono',monospace;color:var(--soft)}
+.ibtn{all:unset;cursor:pointer;font:500 14px 'IBM Plex Mono',monospace;padding:8px 12px;border-radius:3px;border:1px solid var(--line);color:var(--soft);white-space:nowrap}
+.ibtn:hover{border-color:var(--line2);color:var(--ink)}
+.ibtn:focus-visible{outline:2px solid var(--y)}
+.ibtn.on{border-color:var(--y);color:var(--y)}
+select.ibtn{all:revert;font:500 14px 'IBM Plex Mono',monospace;padding:8px 10px;border-radius:3px;border:1px solid var(--line);background:var(--panel);color:var(--ink);max-width:min(340px,40vw)}
+.stagebox{flex:1;display:flex;flex-direction:column;justify-content:center;padding:2.4vh 4.6vw 2.4vh;gap:1.8vh;position:relative}
+.stagebox.qa{justify-content:flex-start;padding-top:clamp(24px,5vh,84px)}
+.frame{position:absolute;inset:1vh 1.5vw;pointer-events:none;border:1px solid rgba(227,181,74,.14);border-radius:4px;--c:rgba(227,181,74,.75);background:
+  linear-gradient(var(--c),var(--c)) 0 0/26px 2px,linear-gradient(var(--c),var(--c)) 0 0/2px 26px,
+  linear-gradient(var(--c),var(--c)) 100% 0/26px 2px,linear-gradient(var(--c),var(--c)) 100% 0/2px 26px,
+  linear-gradient(var(--c),var(--c)) 0 100%/26px 2px,linear-gradient(var(--c),var(--c)) 0 100%/2px 26px,
+  linear-gradient(var(--c),var(--c)) 100% 100%/26px 2px,linear-gradient(var(--c),var(--c)) 100% 100%/2px 26px;background-repeat:no-repeat}
+.meta{display:flex;gap:18px;align-items:center;flex-wrap:wrap;font:500 clamp(13px,1.3vw,19px) 'IBM Plex Mono',monospace;color:var(--soft)}
+.pill{background:rgba(227,181,74,.08);color:var(--y);border:1px solid var(--y);padding:5px 12px;border-radius:2px;white-space:nowrap}
+.prog{display:flex;gap:3px;align-items:flex-end;height:12px}
+.prog i{width:clamp(7px,.9vw,15px);height:5px;background:rgba(127,166,216,.2);border-radius:1px}
+.prog i.t2{height:8px}.prog i.t3{height:11px}
+.prog i.d{background:rgba(227,181,74,.5)}
+.prog i.c{background:var(--y2);box-shadow:0 0 10px rgba(227,181,74,.9)}
+.hint{font:500 clamp(13px,1.2vw,18px) 'IBM Plex Mono',monospace;color:var(--soft)}
+.auto{font:500 14px 'IBM Plex Mono',monospace;color:var(--soft)}
+.big{font-size:clamp(44px,7vw,116px)}
+.h2{font-size:clamp(28px,3.6vw,58px)}
+
+/* Großer Bildschirm: alles bleibt im Bild, die Bühne wird bei Bedarf per fit() verkleinert. Kleine Displays scrollen */
+@media(min-width:900px) and (min-height:540px){#tv:not(.tall){height:100vh;height:100dvh;min-height:0}#tv:not(.tall) .stagebox{min-height:0;overflow:hidden}}
+.stagebox.measure *{animation:none!important}
+/* ---------- TV: Frage und Antworten ---------- */
+.tbarline{height:5px;background:var(--line);overflow:hidden;border-radius:1px}
+.qa .tbarline{margin-right:calc(clamp(84px,9.5vw,150px) + 2vw)}
+.tbarline i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--y),var(--y2));transform-origin:0 50%}
+.tbarline.low i{background:var(--bad)}
+.qtext{font:600 clamp(22px,min(3.3vw,5.7vh),58px)/1.18 'IBM Plex Sans',sans-serif;text-wrap:balance;max-width:34ch;text-shadow:0 2px 24px rgba(3,8,16,.8)}
+.ans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(10px,1.3vw,22px)}
+.an{--c:var(--y);position:relative;display:flex;gap:clamp(12px,1.3vw,22px);align-items:center;overflow:hidden;background:linear-gradient(180deg,rgba(23,42,68,.93),rgba(13,25,42,.93));border:1px solid var(--line2);border-radius:4px;padding:clamp(10px,min(1.4vw,2.2vh),24px);padding-left:clamp(16px,1.7vw,30px);font:600 clamp(16px,min(2vw,3.5vh),32px)/1.25 'IBM Plex Sans',sans-serif;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 28px rgba(0,0,0,.3)}
+.an::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--c)}
+.an .l{flex:none;width:1.9em;height:1.9em;border-radius:3px;display:grid;place-items:center;color:var(--dark);background:var(--c);font:700 1em 'IBM Plex Mono',monospace;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.an .tx{flex:1}
+.an .who{display:block;font:500 clamp(12px,1vw,17px)/1.3 'IBM Plex Mono',monospace;color:var(--soft);margin-top:4px;min-height:1.3em}
+.an .tick{flex:none;width:1.7em;height:1.7em;border-radius:50%;display:grid;place-items:center;background:var(--y);color:var(--dark);font:700 .9em 'IBM Plex Mono',monospace}
+.an.no{opacity:.4}
+.an.ok{border-color:var(--y);background:linear-gradient(180deg,rgba(58,56,48,.96),rgba(24,36,52,.96));box-shadow:0 0 0 1px var(--y),0 0 46px rgba(227,181,74,.3),inset 0 1px 0 rgba(255,255,255,.1)}
+.an.ok::after{content:"";position:absolute;top:0;bottom:0;left:0;width:34%;background:linear-gradient(100deg,transparent,rgba(255,236,180,.26),transparent);transform:translateX(-120%)}
+.an.ok .who{color:var(--y2)}
+.dd{display:grid;grid-template-columns:1fr 1fr;gap:2vw;margin-top:1vh}
+.dd .an{justify-content:center;text-align:center;font-size:clamp(20px,2.8vw,44px);padding-block:clamp(14px,2.6vh,34px)}
+.dd .an .tx{flex:none}
+.item{font:700 clamp(44px,min(9vw,16vh),140px)/1 'IBM Plex Sans',sans-serif;text-align:center;letter-spacing:-.02em;color:var(--y);text-shadow:0 0 50px rgba(227,181,74,.28)}
+.slot{display:flex;gap:2vw;align-items:center;flex-wrap:wrap;min-height:clamp(74px,12vh,130px)}
+.slot .quip{flex:1 1 420px}
+.gobox{flex:none;display:grid;gap:6px;justify-items:center}
+.quip{background:rgba(20,38,61,.9);color:var(--ink);border:1px solid var(--line);border-left:3px solid var(--y);border-radius:3px;padding:12px 20px;font:500 clamp(15px,min(1.6vw,3vh),25px)/1.35 'IBM Plex Sans',sans-serif;max-width:62ch;position:relative}
+.quip::before{content:"// Kevin vom Helpdesk";display:block;font:500 13px 'IBM Plex Mono',monospace;color:var(--y);margin-bottom:3px}
+.ring{position:absolute;right:4.6vw;top:3.2vh;width:clamp(84px,9.5vw,150px);aspect-ratio:1;z-index:3}
+.ring::before{content:"";position:absolute;inset:8%;border-radius:50%;background:rgba(8,16,28,.88);box-shadow:0 0 34px rgba(227,181,74,.16)}
+.ring svg{position:relative;width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none}
+.ring .bg{stroke:rgba(127,166,216,.16);stroke-width:7}
+.ring .tk{stroke:rgba(127,166,216,.4);stroke-width:2.5;stroke-dasharray:.8 14.908}
+.ring .fg{stroke:var(--y);stroke-width:7;stroke-dasharray:276.46;stroke-dashoffset:0}
+.ring b{position:absolute;inset:0;display:grid;place-items:center;font:700 clamp(28px,3.3vw,52px) 'IBM Plex Mono',monospace;color:var(--ink);font-variant-numeric:tabular-nums}
+.ring.low .fg{stroke:var(--bad)}.ring.low b{color:var(--bad)}
+
+/* ---------- TV: Lobby ---------- */
+.lgrid{display:grid;grid-template-columns:auto minmax(0,1fr);gap:clamp(20px,3.4vw,64px);align-items:start}
+.ljoin{display:grid;gap:12px;justify-items:start}
+.lside{display:grid;gap:clamp(8px,1.5vh,16px)}
+.qr{background:#eef3fb;padding:12px;border-radius:4px;width:clamp(170px,min(21vw,34vh),300px);aspect-ratio:1;box-shadow:0 0 0 1px rgba(227,181,74,.5),0 18px 50px rgba(0,0,0,.4)}
+.qr svg{width:100%;height:100%;display:block}
+.code{font:600 clamp(40px,5.4vw,92px)/1 'IBM Plex Mono',monospace;color:var(--y);letter-spacing:.08em;text-shadow:0 0 40px rgba(227,181,74,.3)}
+.mini{font-family:'IBM Plex Mono',monospace;color:var(--y);font-size:clamp(14px,1.4vw,20px)}
+.players{display:flex;flex-wrap:wrap;gap:8px}
+.pl{background:rgba(15,28,46,.86);border:1px solid var(--line2);border-radius:3px;padding:6px 14px;font:600 clamp(15px,1.5vw,22px) 'IBM Plex Sans',sans-serif}
+.rounds{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;max-width:1300px}
+.rnd{all:unset;cursor:pointer;display:grid;gap:2px;background:rgba(15,28,46,.86);border:1px solid var(--line);border-left:4px solid var(--a1);border-radius:3px;padding:10px 14px}
+.rnd b{font:700 clamp(15px,1.4vw,21px)/1.2 'IBM Plex Sans',sans-serif}
+.rnd span{font:500 13px 'IBM Plex Mono',monospace;color:var(--soft)}
+.rnd em{font:600 13px 'IBM Plex Mono',monospace;font-style:normal;color:var(--a1)}
+.rnd.done{border-left-color:var(--soft);opacity:.7}.rnd.done em{color:var(--soft)}
+.rnd.on{border-color:var(--y);border-left-color:var(--y);opacity:1;box-shadow:0 0 0 1px var(--y),0 0 30px rgba(227,181,74,.2)}
+.rnd:focus-visible{outline:2px solid var(--y)}
+.vtag{font:600 12px 'IBM Plex Mono',monospace;padding:3px 8px;border-radius:2px;border:1px solid var(--a1);color:var(--a1);text-transform:uppercase;letter-spacing:.06em}
+.vtag.net{border-color:var(--y);color:var(--y)}
+.small{font-size:clamp(12px,1vw,15px)}
+
+/* ---------- TV: Zwischenstand und Endstand ---------- */
+.board{display:grid;gap:8px;max-width:1500px}
+.board.c2{grid-auto-flow:column;grid-template-rows:repeat(var(--rows),auto);grid-template-columns:1fr 1fr;column-gap:16px;max-width:none}
+.brow{display:grid;grid-template-columns:2.2em minmax(5em,13em) 1fr auto 6.4em;gap:16px;align-items:center;background:linear-gradient(180deg,rgba(21,39,63,.93),rgba(13,25,42,.93));border:1px solid var(--line);border-radius:3px;padding:clamp(6px,1.1vh,14px) 18px;font:600 clamp(16px,min(2vw,3.4vh),32px) 'IBM Plex Sans',sans-serif;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.board.c2 .brow{font-size:clamp(14px,min(1.5vw,2.6vh),24px);grid-template-columns:2em minmax(4em,9em) 1fr auto 5.6em;gap:10px;padding-inline:12px}
+.brow.lead{border-color:var(--y);box-shadow:0 0 30px rgba(227,181,74,.18),inset 0 1px 0 rgba(255,255,255,.08)}
+.board.pre .brow.lead{border-color:var(--line);box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+.board.pre .bname i{visibility:hidden}
+.bpos{font:700 1.1em 'IBM Plex Mono',monospace;color:var(--y)}
+.bname{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bname i{font-style:normal;font:600 .6em 'IBM Plex Mono',monospace;margin-left:10px}
+.up{color:var(--a1)}.dn{color:var(--bad)}
+.bbar{height:.5em;background:rgba(127,166,216,.12);border-radius:1px;overflow:hidden}
+.bbar i{display:block;height:100%;background:linear-gradient(90deg,var(--y),var(--y2));transition:width .9s var(--ease)}
+.bbar i.m{background:var(--bad)}
+.bval{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.bd{font:600 .7em 'IBM Plex Mono',monospace;text-align:right;white-space:nowrap;color:var(--soft)}
+.pos{color:var(--a1)}.neg{color:var(--bad)}
+.podium{display:grid;gap:8px;max-width:900px}
+.podium div{display:flex;justify-content:space-between;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:12px 22px;font:600 clamp(19px,2.2vw,34px) 'IBM Plex Sans',sans-serif}
+.pod{display:flex;align-items:flex-end;justify-content:center;gap:clamp(8px,1.2vw,20px);height:min(36vh,360px);max-width:1100px;width:100%;margin:0 auto}
+.pcol{flex:1 1 0;max-width:340px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;text-align:center}
+.pinfo{display:grid;gap:2px;padding:0 6px 10px}
+.pname{font:700 clamp(18px,2.2vw,36px)/1.15 'IBM Plex Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pamt{font:600 clamp(14px,1.5vw,24px) 'IBM Plex Mono',monospace;color:var(--soft);font-variant-numeric:tabular-nums}
+.pstep{height:var(--h);min-height:44px;display:grid;place-items:center;background:linear-gradient(180deg,rgba(30,52,82,.95),rgba(13,25,42,.9));border:1px solid var(--line2);border-top:3px solid var(--soft);border-radius:3px 3px 0 0;transform-origin:50% 100%}
+.pstep b{font:700 clamp(26px,3.4vw,60px)/1 'IBM Plex Mono',monospace;color:var(--soft)}
+.p2 .pstep b{font-size:clamp(22px,2.8vw,48px)}.p3 .pstep b{font-size:clamp(18px,2.1vw,36px)}
+.p1{--h:62%}.p2{--h:42%}.p3{--h:27%}
+.p1 .pname{color:var(--y);font-size:clamp(22px,2.9vw,48px)}.p1 .pamt{color:var(--ink)}
+.p1 .pstep{border-top-color:var(--y);background:linear-gradient(180deg,rgba(84,72,40,.95),rgba(20,34,52,.92));box-shadow:0 0 60px rgba(227,181,74,.22)}
+.p1 .pstep b{color:var(--y)}
+.rest{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.rest span{background:rgba(15,28,46,.86);border:1px solid var(--line);border-radius:3px;padding:5px 12px;font:600 clamp(14px,1.3vw,20px) 'IBM Plex Sans',sans-serif;white-space:nowrap}
+.rest b{font-family:'IBM Plex Mono',monospace;color:var(--y)}.rest em{font-style:normal;font-family:'IBM Plex Mono',monospace;color:var(--soft);margin-left:6px}
+.endrow{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+
+/* ---------- TV: Punkteleiste ---------- */
+.sbar{display:flex;gap:10px;padding:10px 3vw 14px;overflow-x:auto;border-top:1px solid var(--line);background:rgba(10,20,34,.85)}
+.sc{flex:none;background:rgba(15,28,46,.86);border:1px solid var(--line);border-radius:3px;padding:7px 14px;min-width:120px;transition:border-color .25s}
+.sc b{display:block;font:500 13px 'IBM Plex Mono',monospace;color:var(--soft);white-space:nowrap}
+.sc span{font:700 22px 'IBM Plex Sans',sans-serif;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sc em{font-style:normal;font:600 13px 'IBM Plex Mono',monospace;margin-left:6px}
+.sc.lead{border-color:rgba(227,181,74,.55);background:var(--panel2)}
+.sc.done{border-color:var(--a1)}
+.sc.done b::after{content:" ✓";color:var(--a1)}
+.sc b{overflow:hidden;text-overflow:ellipsis}
+.sbar.many{gap:6px;flex-wrap:wrap;overflow:visible;padding-block:8px 10px}
+.sbar.many .sc{flex:1 1 86px;min-width:86px;max-width:170px;padding:4px 9px}
+.sbar.many .sc span{font-size:17px}.sbar.many .sc b{font-size:12px}
+.sbar.many .sc em{display:none}.sbar.many .sc.won span{color:var(--a1)}.sbar.many .sc.lost span{color:var(--bad)}
+
+/* ---------- Effekte: Lichtkegel als Compositor-Ebenen, WebGL-Leinwand ---------- */
+body.fxon{background:var(--bg);background-image:none}
+#fx{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none}
+#beams{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.beam{opacity:.6;position:absolute;top:-8vh;width:90vh;height:128vh;margin-left:-45vh;transform-origin:50% 0;will-change:transform;background:conic-gradient(from 169deg at 50% 0%,transparent 0deg,rgba(var(--c),.3) 7deg,rgba(var(--c),.42) 11deg,rgba(var(--c),.3) 15deg,transparent 22deg,transparent 360deg);-webkit-mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 45%,transparent 94%);mask-image:linear-gradient(180deg,#000 0%,rgba(0,0,0,.55) 45%,transparent 94%)}
+body.fxon .tbar,body.fxon .sbar,body.beamon .tbar,body.beamon .sbar{background:rgba(10,20,34,.92)}
+
+/* ---------- Auftritte: nur beim Phasenwechsel, nichts läuft in Schleife ---------- */
+@keyframes rise{from{opacity:0;transform:translateY(26px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes dim{from{opacity:1}to{opacity:.4}}
+@keyframes okin{0%{border-color:var(--line2);background:linear-gradient(180deg,rgba(23,42,68,.93),rgba(13,25,42,.93));box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 10px 28px rgba(0,0,0,.3);transform:none}55%{transform:scale(1.045)}100%{transform:scale(1.015)}}
+@keyframes sweep{from{transform:translateX(-120%)}to{transform:translateX(420%)}}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes splash{0%{opacity:0;transform:scale(1.6)}18%{opacity:1;transform:scale(1)}72%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.86)}}
+.stagebox.fresh .qtext,.stagebox.fresh .marq,.stagebox.fresh .item{animation:rise .55s var(--ease) var(--d,0s) both}
+.stagebox.fresh .an{animation:rise .5s var(--ease) calc(var(--d,0s) + var(--i,0)*.08s) both}
+.stagebox.fresh .quip,.stagebox.fresh .podium div{animation:rise .5s var(--ease) calc(var(--d,0s) + .25s) both}
+.stagebox.sp{--d:1.25s}   /* solange die Einblendung "Frage N" steht, kommen Frage und Kacheln erst danach */
+/* Frage und Kacheln stehen schon: beim Wechsel zu Countdown und Auflösung nicht noch einmal einfliegen */
+.stagebox.fresh.stay .qtext,.stagebox.fresh.stay .item,.stagebox.fresh.stay .an:not(.ok):not(.no){animation:none}
+.stagebox.fresh .item{animation-duration:.3s}
+.stagebox.fresh .brow{animation:fade .4s ease both}
+.quip.swap{animation:fade .45s ease both}
+.stagebox.fresh .ans .an.no{animation:dim .5s ease .45s both}
+.stagebox.fresh .ans .an.ok{animation:okin .7s var(--ease) .45s both}
+.stagebox.fresh .ans .an.ok::after{animation:sweep 1s ease-out .6s both}
+.stagebox.fresh .ans .who,.stagebox.fresh .ans .tick{animation:fade .4s ease .6s both}
+.stagebox.fresh .dd .an.no,.stagebox.fresh .dd .an.ok{animation:none}
+.stagebox.fresh .dd .an.ok::after{animation:sweep .8s ease-out both}
+.stagebox.fresh .pstep{animation:grow .9s var(--ease) both}
+.stagebox.fresh .pinfo{animation:rise .6s var(--ease) both}
+.stagebox.fresh .p3 .pstep{animation-delay:.2s}.stagebox.fresh .p3 .pinfo{animation-delay:.7s}
+.stagebox.fresh .p2 .pstep{animation-delay:.8s}.stagebox.fresh .p2 .pinfo{animation-delay:1.3s}
+.stagebox.fresh .p1 .pstep{animation-delay:1.5s}.stagebox.fresh .p1 .pinfo{animation-delay:2.1s}
+.stagebox.fresh .rest,.stagebox.fresh .endrow{animation:fade .6s ease 2.4s both}
+.stagebox.fresh .pod~.quip{animation:fade .6s ease 2.6s both}
+.splash{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:5}
+.splash div{text-align:center;animation:splash 1.8s var(--ease) both}
+.splash b{display:block;font:700 clamp(64px,10vw,180px)/1 'IBM Plex Sans',sans-serif;color:var(--y);text-shadow:0 0 40px rgba(227,181,74,.5);letter-spacing:-.02em}
+.splash span{font:600 clamp(26px,3.5vw,56px) 'IBM Plex Mono',monospace;color:var(--ink)}
+
+/* ---------- Handy ---------- */
+#ph{display:none}#ph.on{display:block}
+.pbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);background:rgba(10,20,34,.9);font:600 15px 'IBM Plex Sans',sans-serif}
+.pbar .logo svg{height:22px}
+.pbody{padding:18px 16px 40px;max-width:560px;margin:0 auto}
+.buzz{display:grid;gap:12px;margin-top:14px}
+.bz{all:unset;cursor:pointer;display:flex;gap:14px;align-items:center;min-height:64px;padding:14px 16px;border-radius:4px;color:var(--dark);font:700 19px/1.25 'IBM Plex Sans',sans-serif;box-shadow:inset 0 -4px 0 rgba(0,0,0,.16);touch-action:manipulation;user-select:none;-webkit-user-select:none}
+.bz:active{transform:scale(.98)}
+.bz:focus-visible{outline:2px solid var(--ink)}
+.bz .l{font:700 22px 'IBM Plex Mono',monospace;flex:none}
+.bz.dd2{min-height:120px;justify-content:center;font-size:26px}
+.state{font:700 clamp(28px,8.5vw,42px)/1.12 'IBM Plex Sans',sans-serif;margin:24px 0 8px;text-wrap:balance}
+.ptimer{font:600 38px 'IBM Plex Mono',monospace;color:var(--y);font-variant-numeric:tabular-nums}
+.lock{display:flex;gap:14px;align-items:center;padding:14px 16px;border-radius:4px;border:1px solid var(--line2);border-left:5px solid var(--c,var(--y));background:var(--panel);font:600 18px/1.25 'IBM Plex Sans',sans-serif;margin-top:8px}
+.lock b{font:700 22px 'IBM Plex Mono',monospace;color:var(--c,var(--y))}
+@media(max-width:700px){.ans{grid-template-columns:1fr}.lgrid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}.stagebox.fresh *,.splash div{animation:none!important}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+</head>
+<body>
+
+<section id="pick" class="wrap">
+  <span class="logo"><svg viewBox="0 0 148 40" role="img" aria-label="Kioptra"><g transform="translate(-2.84,-9.4) scale(0.186)" fill="none" stroke="#E3B54A" stroke-linecap="round" stroke-linejoin="round"><line x1="90" y1="180" x2="56" y2="250" stroke-width="11"></line><line x1="114" y1="180" x2="114" y2="254" stroke-width="11"></line><line x1="138" y1="180" x2="172" y2="250" stroke-width="11"></line><line x1="114" y1="82" x2="114" y2="180" stroke-width="9"></line><path d="M53.8 96.7 A62 62 0 0 0 174.2 67.3" stroke-width="10"></path><line x1="32" y1="102" x2="196" y2="62" stroke-width="12"></line><line x1="76" y1="180" x2="152" y2="180" stroke-width="13"></line></g><text x="42" y="27" font-family="IBM Plex Sans,system-ui,sans-serif" font-weight="600" font-size="23" letter-spacing="-0.3" fill="#eef3fb">Kioptra</text></svg></span>
+  <div class="marq">Kein Plan, <em>Herr Berater</em></div>
+  <p>Die Quizshow für Leute, die für Wissen Tagessätze nehmen. Ein großer Bildschirm zeigt die Show, alle anderen spielen mit dem Handy.</p>
+  <div class="roles">
+    <button class="role alt" id="asHost"><b>Großer Bildschirm</b><span>Auf dem Fernseher, dem Laptop oder einem Handy, das aufs TV gespiegelt wird. Zeigt den QR-Code zum Mitspielen.</span></button>
+    <button class="role" id="asPlayer"><b>Mitspielen</b><span>Lieber den QR-Code auf dem Fernseher scannen. Oder hier den Show-Code eintippen.</span></button>
+  </div>
+</section>
+
+<div id="tv">
+  <div class="tbar"><span class="logo"><svg viewBox="0 0 148 40" role="img" aria-label="Kioptra"><g transform="translate(-2.84,-9.4) scale(0.186)" fill="none" stroke="#E3B54A" stroke-linecap="round" stroke-linejoin="round"><line x1="90" y1="180" x2="56" y2="250" stroke-width="11"></line><line x1="114" y1="180" x2="114" y2="254" stroke-width="11"></line><line x1="138" y1="180" x2="172" y2="250" stroke-width="11"></line><line x1="114" y1="82" x2="114" y2="180" stroke-width="9"></line><path d="M53.8 96.7 A62 62 0 0 0 174.2 67.3" stroke-width="10"></path><line x1="32" y1="102" x2="196" y2="62" stroke-width="12"></line><line x1="76" y1="180" x2="152" y2="180" stroke-width="13"></line></g><text x="42" y="27" font-family="IBM Plex Sans,system-ui,sans-serif" font-weight="600" font-size="23" letter-spacing="-0.3" fill="#eef3fb">Kioptra</text></svg></span><span class="marq">Kein Plan, Herr Berater</span><span class="lab" id="tLab"></span><span class="mini" id="tCode"></span><button class="ibtn" id="fxb">Effekte an</button><button class="ibtn" id="pause">Auto an</button><button class="ibtn" id="mute">Ton an</button></div>
+  <div class="stagebox" id="stage"></div>
+  <div class="sbar" id="sbar"></div>
+</div>
+
+<div id="ph">
+  <div class="pbar"><span class="logo"><svg viewBox="0 0 148 40" role="img" aria-label="Kioptra"><g transform="translate(-2.84,-9.4) scale(0.186)" fill="none" stroke="#E3B54A" stroke-linecap="round" stroke-linejoin="round"><line x1="90" y1="180" x2="56" y2="250" stroke-width="11"></line><line x1="114" y1="180" x2="114" y2="254" stroke-width="11"></line><line x1="138" y1="180" x2="172" y2="250" stroke-width="11"></line><line x1="114" y1="82" x2="114" y2="180" stroke-width="9"></line><path d="M53.8 96.7 A62 62 0 0 0 174.2 67.3" stroke-width="10"></path><line x1="32" y1="102" x2="196" y2="62" stroke-width="12"></line><line x1="76" y1="180" x2="152" y2="180" stroke-width="13"></line></g><text x="42" y="27" font-family="IBM Plex Sans,system-ui,sans-serif" font-weight="600" font-size="23" letter-spacing="-0.3" fill="#eef3fb">Kioptra</text></svg></span><span id="pMe"></span></div>
+  <div class="pbody" id="pBody"></div>
+</div>
+
+<script>
+{
+const QS=[
+{i:'Willkommen bei Kein Plan, Herr Berater! Erste Frage, zum Aufwärmen. Bitte nicht verletzen.',q:'Laut der 90-90-Regel brauchen die ersten 90 Prozent des Codes 90 Prozent der Zeit. Und die restlichen 10 Prozent?',a:['10 Prozent der Zeit','Noch einmal 90 Prozent','Genau bis zum Go-Live','Die macht die Hypercare'],c:1,r:'Noch mal 90 Prozent. Macht zusammen 180 Prozent. Genau so steht es auch auf eurer Rechnung.'},
+{i:'Stellt euch vor, euer Projekt ist verspätet. Ich weiß, schwer vorstellbar.',q:'Was passiert laut Brooks’s Law, wenn man einem verspäteten Softwareprojekt mehr Leute gibt?',a:['Es wird pünktlich','Es wird noch später','Teurer, aber pünktlich','Der Kunde merkt nichts'],c:1,r:'Noch später! Neun Leute bekommen auch kein Baby in einem Monat. Sagt Brooks, nicht ich.'},
+{i:'Geschichtsstunde. Kaffee runter, Augen auf.',q:'1947 fand das Team um Grace Hopper im Harvard Mark II den ersten echten Bug. Was war es?',a:['Eine Motte','Eine Kakerlake','Eine Stubenfliege','Ein Praktikant'],c:0,r:'Eine Motte. Sie wurde ins Logbuch geklebt. Debugging im wörtlichsten Sinne.'},
+{i:'Jetzt etwas für die Web-Leute unter euch. Beide.',q:'Welcher HTTP-Statuscode bedeutet offiziell „I’m a teapot“?',a:['404','418','451','503'],c:1,r:'418! Ein Aprilscherz von 1998, der es bis in echte Server geschafft hat. Wie die meisten Anforderungen eurer Kunden.'},
+{i:'Jetzt wird es akademisch. Wer hier rät, moderiert morgen den Workshop.',q:'Welches Gesetz sagt: Systeme spiegeln die Kommunikationsstruktur der Organisation, die sie baut?',a:['Parkinsons Gesetz','Das Peter-Prinzip','Conways Gesetz','Murphys Gesetz'],c:2,r:'Conway! Drei Abteilungen, die nicht miteinander reden, bauen drei Systeme, die nicht miteinander reden. Grüße an jede Schnittstelle.'},
+{i:'Ab jetzt doppelter Tagessatz. Der Kunde stellt hohe Ansprüche.',q:'Der Kunde will 99,999 Prozent Verfügbarkeit. Wie viel Ausfall pro Jahr ist dann noch erlaubt?',a:['Etwa 5 Minuten','Etwa 53 Minuten','Etwa 9 Stunden','Ein Freitagnachmittag'],c:0,r:'Rund 5 Minuten im Jahr. Ungefähr so lange, wie ihr im Teams-Call euer Mikro sucht.'},
+{dd:1},
+{i:'Zurück zu den normalen Fragen. Normal im Sinne von Beratung.',q:'Woher stammt der Begriff Spam für unerwünschte Mails?',a:['Aus einem Monty-Python-Sketch','„Send Phenomenal Amounts of Mail“','Aus einem Militärcode','Von einem genervten Admin'],c:0,r:'Monty Python! Im Sketch wird so lange Spam gesungen, bis niemand mehr etwas anderes versteht. Wie in eurem Postfach.'},
+{i:'Eine Frage für alle, die schon mal eine Konfigurationsdatei gehasst haben. Also alle.',q:'Wofür steht das Y in YAML?',a:['Yet','YAML','Your','Yoga'],c:1,r:'YAML Ain’t Markup Language. Ein rekursives Akronym. Entwickler finden so etwas witzig. Sonst finden sie nur Einrückungsfehler.'},
+{i:'Sprachkurs mit Kevin.',q:'Das Wort Roboter kommt aus dem Tschechischen. Was bedeutete „robota“ ursprünglich?',a:['Blechmann','Fronarbeit','Rechenknecht','Unbezahlte Überstunden'],c:1,r:'Fronarbeit. Unbezahlte Überstunden war aber verdammt nah dran.'},
+{i:'Die Scrum Master im Raum, bitte jetzt nicht vorsagen.',q:'Welches dieser Events gibt es im Scrum Guide NICHT?',a:['Sprint Review','Daily Scrum','Sprint Retrospective','Sprint Recovery Brunch'],c:3,r:'Der Recovery Brunch ist leider nicht offiziell. Wer ihn trotzdem einführt: Ich bin dabei.'},
+{i:'Jetzt dreifacher Tagessatz. Und eine Frage für die Datenschutz-Fraktion.',q:'Bis zu wie viel Prozent des weltweiten Jahresumsatzes darf ein DSGVO-Bußgeld betragen?',a:['1 Prozent','2 Prozent','4 Prozent','10 Prozent'],c:2,r:'4 Prozent oder 20 Millionen Euro, je nachdem, was höher ist. Irgendwer hier nickt gerade sehr zufrieden.'},
+{i:'Eine Frage für Leute, die gern frühzeitig Angebote schreiben.',q:'In welchem Jahr läuft die vorzeichenbehaftete 32-Bit-Unix-Zeit über?',a:['2025','2038','2049','Nie, wir sind in der Cloud'],c:1,r:'Am 19. Januar 2038. Tragt euch das ein. Das wird der beste Tagessatz eures Lebens.'},
+{i:'Fast geschafft. Jetzt etwas Methodik.',q:'Was ist Rubber Duck Debugging?',a:['Testen in der Badewanne','Einer Gummiente den Code erklären, bis man den Fehler selbst findet','Ein Tool, das bei Fehlern quakt','Bugs an den Junior delegieren'],c:1,r:'Man erklärt der Ente den Code und findet den Fehler selbst. Berater nennen das übrigens Workshop.'},
+{i:'Vorletzte Frage. Rechnet mit.',q:'Wie viele Bytes hat ein Kibibyte?',a:['1000','1024','1048','Kommt auf den Vertrieb an'],c:1,r:'1024. Ein Kilobyte hat 1000. Ja, wirklich. Nein, das wusste vorher niemand.'},
+{i:'Die Finalfrage! Jetzt geht es um alles. Oder zumindest um die Ehre.',q:'Wer machte „Hello, World!“ als erstes Beispielprogramm berühmt?',a:['Bill Gates','Brian Kernighan','Linus Torvalds','Ada Lovelace'],c:1,r:'Brian Kernighan von den Bell Labs. Seitdem beginnt jede IT-Karriere mit einer kleinen Lüge: Hallo Welt, ich bleib nur kurz.'}
+];
+const DD={i:'Dis oder Dat! Ich nenne euch Namen. Ihr sagt mir: Pokémon oder Big-Data-Tool? Sechs Sekunden pro Name. Richtig gibt 500 Euro, falsch kostet 500.',opts:['Pokémon','Big-Data-Tool'],items:[['Hadoop',1],['Nidoking',0],['Kafka',1],['Porygon',0],['Flink',1],['Feraligatr',0],['Druid',1],['Rhydon',0]]};
+
+const ACOL=['var(--a0)','var(--a1)','var(--a2)','var(--a3)'],LET='ABCD';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur=n=>(n<0?'−':'')+Math.abs(n).toLocaleString('de-DE')+' €';
+const key=n=>String(n||'').trim().toLowerCase().slice(0,24);
+const ls={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const PFX='kein-plan-berater-';
+const QS2=[
+{i:'Willkommen zu Runde zwei! Neue Fragen, gleiche Tagessätze. Wer in Runde eins geglänzt hat: Das ist jetzt egal.',q:'Wie viele Zeichen durfte ein Tweet ursprünglich maximal haben?',a:['120','140','160','280'],c:1,r:'140 Zeichen. Genug für eine Management Summary. Mehr liest eh keiner.'},
+{i:'Eine Frage für die Kaffeetrinker.',q:'Welches Unternehmen hat die Programmiersprache Java ursprünglich entwickelt?',a:['Oracle','Sun Microsystems','IBM','Microsoft'],c:1,r:'Sun Microsystems. Oracle kam erst später dazu, zusammen mit sehr kreativen Lizenzmodellen.'},
+{i:'Vertragsrecht für Anfänger.',q:'Wofür steht die Abkürzung SLA?',a:['Service Level Agreement','System Load Analysis','Software License Audit','Schnell, Leise, Abrechenbar'],c:0,r:'Service Level Agreement. Also das Dokument, das im Incident plötzlich niemand gelesen hat.'},
+{i:'Ein bisschen Firmengeschichte aus der Kurpfalz.',q:'In welchem Jahr wurde SAP gegründet?',a:['1964','1972','1983','1991'],c:1,r:'1972, von fünf ehemaligen IBM-Mitarbeitern. Die Einführungsprojekte von damals laufen teilweise heute noch.'},
+{i:'Jetzt die Lieblingsregel aller Berater.',q:'Das Pareto-Prinzip sagt: Mit 20 Prozent des Aufwands erreicht man …?',a:['20 Prozent des Ergebnisses','50 Prozent des Ergebnisses','80 Prozent des Ergebnisses','Den nächsten Folgeauftrag'],c:2,r:'80 Prozent. Die restlichen 20 Prozent stehen dann im Change Request.'},
+{i:'Ab jetzt doppelter Tagessatz. Netzwerker, eure Stunde.',q:'Wie viele Bit hat eine IPv6-Adresse?',a:['32','64','128','256'],c:2,r:'128 Bit. Genug Adressen, um jedem Sandkorn eine eigene IP zu geben. Und trotzdem hängt der Drucker.'},
+{dd:1},
+{i:'Weiter mit IT-Sicherheit. Bitte alle kurz die Bildschirme sperren.',q:'Was ist eine Zero-Day-Lücke?',a:['Eine Lücke, für die es noch keinen Patch gibt','Der erste Tag nach dem Go-Live','Ein Arbeitstag ohne Meetings','Ein Backup ohne Daten'],c:0,r:'Eine Lücke ohne Patch. Ein Arbeitstag ohne Meetings wäre allerdings die größere Sensation.'},
+{i:'Startup-Geschichte für Fortgeschrittene.',q:'Unter welchem Namen startete Google ursprünglich?',a:['Googol','BackRub','Searchy','PageRank Inc.'],c:1,r:'BackRub! Klingt eher nach Wellness als nach Weltherrschaft.'},
+{i:'Eine Frage für alle, die Projektpläne in Excel bauen. Also für euch.',q:'Wie viele Spalten hat ein Excel-Arbeitsblatt seit Excel 2007 maximal?',a:['256','1.024','16.384','65.536'],c:2,r:'16.384, bis Spalte XFD. Und trotzdem baut irgendwer einen Projektplan, der nicht reicht.'},
+{i:'Governance! Alle mal ernst gucken.',q:'Wofür steht RACI in der Verantwortungsmatrix?',a:['Responsible, Accountable, Consulted, Informed','Requirements, Architecture, Code, Integration','Risk, Action, Cost, Impact','Rechnung, Angebot, Change, Irgendwas'],c:0,r:'Responsible, Accountable, Consulted, Informed. In der Praxis: alle informiert, keiner verantwortlich.'},
+{i:'Dreifacher Tagessatz. Jetzt wird es teuer.',q:'Was bedeutet der HTTP-Statuscode 401?',a:['Nicht autorisiert','Verboten','Nicht gefunden','Interner Serverfehler'],c:0,r:'401, Unauthorized. 403 wäre verboten. Merkt euch das für den nächsten Pen-Test-Bericht.'},
+{i:'Hardware-Frage. Gordon Moore lässt grüßen.',q:'Laut Moores Gesetz verdoppelt sich die Zahl der Transistoren auf einem Chip etwa alle …?',a:['6 Monate','2 Jahre','5 Jahre','10 Jahre'],c:1,r:'Etwa alle zwei Jahre. Eure Budgets verdoppeln sich leider nicht mit.'},
+{i:'Vorletzte Frage. Ehre, wem Ehre gebührt.',q:'Wer gilt als erste Programmiererin der Welt?',a:['Grace Hopper','Ada Lovelace','Margaret Hamilton','Hedy Lamarr'],c:1,r:'Ada Lovelace, schon im 19. Jahrhundert. Ganz ohne Stack Overflow.'},
+{i:'Die Finalfrage der zweiten Runde! Alles oder nichts.',q:'Welches Produkt wurde 1974 als erstes an einer Supermarktkasse per Barcode gescannt?',a:['Kaugummi','Cornflakes','Cola','Bananen'],c:0,r:'Eine Packung Kaugummi! Wrigley’s Juicy Fruit. Und seitdem piept es überall.'}
+];
+const DD2={i:'Dis oder Dat, Runde zwei! Programmiersprache oder Ikea-Produkt? Sechs Sekunden pro Name. Richtig gibt 500 Euro, falsch kostet 500.',opts:['Programmiersprache','Ikea-Produkt'],items:[['Zig',0],['Skubb',1],['Nim',0],['Malm',1],['Elm',0],['Lack',1],['Dart',0],['Frakta',1]],end:'Dis oder Dat ist vorbei. Manche von euch sollten ihre Software lieber mit Inbusschlüssel zusammenbauen.'};
+DD.end='Dis oder Dat ist vorbei. Schaut auf eure Kontostände. Manche von euch sollten über einen Jobwechsel zu Nintendo nachdenken.';
+const ROASTS=['{n}, dein Kontostand sieht aus wie ein Projekt ohne Lastenheft.','{n}, wenn das ein Audit wäre, hätten wir jetzt eine Hauptfeststellung.','{n}, du rätst so konsequent daneben, das ist fast schon eine Methode. Lass sie dir patentieren.','{n}, dein Wissen ist gerade in der Hypercare.','{n}, das Steering Committee hat beschlossen: Du bekommst ein Coaching.','{n}, deine Performance ist rot. Nicht Ampel-Rot, eher Insolvenz-Rot.','{n}, selbst der Praktikant hat gerade Mitleid mit dir.','{n}, ich habe deine Antworten an die Qualitätssicherung geschickt. Die hat gekündigt.','{n}, du hast mehr Minus als ein Festpreisprojekt.','{n}, deine Trefferquote erinnert an das WLAN im ICE.','{n}, bei deinem Kontostand würde jede Bank den Dispo kündigen.','{n}, du spielst offenbar nach dem Motto: erst mal raten, dokumentieren kann man später.','{n}, wenn Unwissen abrechenbar wäre, wärst du heute Partner.','{n}, du bist das Legacy-System dieser Runde. Läuft irgendwie, aber keiner versteht warum.','{n}, dein Spielstand ist ein klassischer Fall von Scope verfehlt.','{n}, du hast heute mehr Fehler produziert als ein Freitags-Deployment.','{n}, das ist kein Kontostand mehr, das ist ein Hilferuf.','{n}, beim nächsten Kundentermin bitte nur Kaffee holen. Und auch da mit Vier-Augen-Prinzip.','{n}, sogar der Bürodrucker hat eine bessere Trefferquote. Und der hat Papierstau.','{n}, du bist der Grund, warum Projekte einen Puffer brauchen.','{n}, dein Beitrag heute ist wertvoll. Als abschreckendes Beispiel.','{n}, laut meiner Analyse ist dein Wissen noch in der Konzeptphase.','{n}, ich buche dir schon mal ein Webinar. Thema: Grundlagen. Von allem.','{n}, dein Daumen ist schneller am Buzzer als dein Hirn am Netz.','{n}, wenn das ein Pitch gewesen wäre, hätte der Kunde jetzt die Konkurrenz angerufen.','{n}, du bist so weit hinten, du bekommst die Fragen schon per Brief.','{n}, dein Kontostand ist so tief, da unten liegt schon das Glasfaserkabel.','{n}, deine Strategie: alle Antworten gleich wahrscheinlich. Mutig. Falsch, aber mutig.','{n}, gute Nachricht: Von hier aus geht es nur noch nach oben. Statistisch zumindest.','{n}, du spielst wie ein Berater im ersten Monat: viel Selbstbewusstsein, wenig Grundlage.','{n}, deine Antworten haben die Qualität einer Datei namens final, final, Version drei.','{n}, ich würde dir einen Lessons-Learned-Workshop anbieten, aber da müsste man erst mal was lernen.','{n}, deine Antworten sind wie Cookie-Banner: Keiner weiß, was dahinter steckt.','{n}, selbst eine Glaskugel hätte hier mehr Treffer als du.','{n}, dein Kontostand hat mehr Rot als jede Risikomatrix.','{n}, du bist der lebende Beweis, dass Zertifikate nicht alles sind.','{n}, ich habe kurz überlegt, dich zu eskalieren. Aber an wen?','{n}, deine Antworten wirken, als hätte sie ein Praktikant mit schlechtem WLAN generiert.','{n}, bei dir ist nicht die Frage, ob es schiefgeht, sondern wie teuer.','{n}, du bist wie ein Change Request am Freitagabend: Keiner wollte das.'];
+const LEADS=['{n} führt mit {s} Euro, {gap} Euro vor {m}.','{n} ist vorne mit {s} Euro. Bitte ab sofort Senior Partner nennen.','{n} thront oben mit {s} Euro. {m} lauert, {gap} Euro dahinter.','Ganz vorne: {n}. {gap} Euro Vorsprung auf {m}. Das riecht nach Bonus.','{n} führt. {m} ist {gap} Euro dahinter und schwitzt schon.','Die Tabelle sagt: {n} mit {s} Euro an der Spitze. Respekt, das war fast schon kompetent.','{n} liegt vorn. {m}, keine Panik, es sind nur {gap} Euro.','Aktuelle Führung: {n} mit {s} Euro. Ich würde ja befördern, aber das entscheidet leider HR.','{n} ist an der Spitze. Wer so viel weiß, schreibt bestimmt auch pünktlich Stundenzettel.','{n} führt mit {s} Euro. {m}, das holst du noch auf. Wahrscheinlich nicht, aber man darf ja träumen.'];
+ROASTS.push('{n}, dein Kontostand ist wie ein Proof of Concept: Es wird nie mehr daraus.','{n}, du lieferst zuverlässig. Leider immer die falsche Antwort.','{n}, deine Antworten kommen schnell und falsch. Das nennt man agil.','{n}, ich würde deinen Spielstand gern schönrechnen, aber so viel Excel gibt es nicht.','{n}, du bist das Ticket, das seit drei Sprints im Backlog liegt.','{n}, dein Wissensstand hat den Status: in Klärung.','{n}, bei dir steht die Ampel nicht auf Rot. Die Ampel ist ausgefallen.','{n}, du erinnerst mich an eine Schnittstelle ohne Dokumentation: Niemand weiß, was rauskommt.','{n}, für deine Leistung gibt es im Projektplan ein Wort: Risiko.','{n}, dein Punktestand ist die beste Werbung für künstliche Intelligenz.','{n}, du hast den Mut eines Vertrieblers und die Trefferquote eines Wetterberichts.','{n}, dein Auftritt heute wäre ein guter Fall für die Lessons Learned. Ganz oben.','{n}, wenn Raten eine Dienstleistung wäre, hättest du längst einen Rahmenvertrag.','{n}, du bist nicht Letzter. Du bist nur sehr weit weg vom Vorletzten.','{n}, dein Konto braucht kein Controlling, es braucht Erste Hilfe.','{n}, selbst die Kaffeemaschine im dritten Stock hat heute mehr geleistet.','{n}, ich habe deinen Spielstand ins Risikoregister eingetragen. Eintrittswahrscheinlichkeit: hundert Prozent.','{n}, deine Antworten sind wie ein Meeting ohne Agenda: lang überlegt und trotzdem ohne Ergebnis.','{n}, du spielst, als hättest du die Anforderungen nicht gelesen. Also wie im echten Projekt.','{n}, dein Ergebnis ist reproduzierbar. Das ist leider das einzig Positive daran.','{n}, auf deinem Zeugnis stünde: war stets bemüht, den Buzzer zu finden.','{n}, du bist die Abnahme, die keiner unterschreiben will.','{n}, bei dir würde sogar ein Zufallsgenerator um Gehaltserhöhung bitten.','{n}, dein Tagessatz liegt gerade unter dem Mindestlohn.','{n}, du bist das Projekt, bei dem alle sagen: Das war vor meiner Zeit.','{n}, deine Punkte sind im Urlaub. Rückkehr unbekannt.','{n}, das war kein Wissen, das war ein Workaround.','{n}, mit dieser Bilanz würde dich nicht mal der eigene Vertrieb verkaufen.','{n}, du hast heute mehr Abstürze als ein Laptop kurz vor der Kundenpräsentation.','{n}, dein Kontostand ist ein Fall für die Revision.','{n}, du bist der Beweis, dass man auch ohne Plan konsequent sein kann.','{n}, deine Lernkurve ist eine Gerade. Leider waagerecht.','{n}, ich habe für dich einen Change Request gestellt: bitte mehr richtige Antworten.','{n}, du antwortest wie eine Hotline: Bitte warten, und am Ende hilft es nicht.','{n}, dein Spielstand ist technisch gesehen noch lauffähig. Fachlich nicht.','{n}, wenn das hier ein Assessment Center wäre, würde man dir jetzt den Ausgang zeigen.','{n}, du sparst dir das Wissen offenbar für den Ernstfall auf. Der wäre jetzt.','{n}, dein Beitrag zur Runde: Du machst alle anderen besser. Rein rechnerisch.','{n}, deine Antworten haben einen klaren Trend. Er zeigt nach unten.','{n}, ich habe deine Punkte gesucht. Laut Monitoring wurden sie nie ausgeliefert.');
+/* Fallbacks für den einen Kommentar pro Frage: ein Spieler, Gleichstand, Roasts aufgebraucht */
+const SOLO_LEAD=['{n} führt das Feld an. Das Feld besteht allerdings nur aus {n}.','{n} liegt mit {s} Euro vorn. Konkurrenzanalyse: keine Konkurrenz.','{n} ist Erster. Bei einem einzigen Teilnehmer nennt man das Marktführerschaft.'];
+const SOLO_ROAST=['{n}, du bist Erster und Letzter zugleich. Such dir aus, was auf die Folie kommt.','{n}, du spielst allein und es bleibt trotzdem spannend. Das muss man auch erst mal schaffen.','{n}, ohne Gegner kann man nicht verlieren. Du arbeitest aber daran.','{n}, {s} Euro ganz ohne Konkurrenz. Stell dir vor, es würde jemand mitspielen.'];
+const TIE_TOP=['{n} und {m} liegen gleichauf an der Spitze, beide mit {s} Euro. Das klären wir im nächsten Meeting.','Gleichstand ganz vorne: {n} und {m} mit je {s} Euro. Starke Leistung, doppelt abgerechnet.','{n} und {m} teilen sich Platz eins mit {s} Euro. Fehlt nur noch der gemeinsame Stundenzettel.'];
+const TIE_MANY=['Gedränge an der Spitze: {names} liegen gleichauf mit {s} Euro. Das klären wir im nächsten Meeting.','{names} teilen sich Platz eins mit je {s} Euro. So viele Gewinner gibt es sonst nur in der Vertriebspräsentation.'];
+const TIE_ALL=['Alle gleichauf mit {s} Euro. So viel Einigkeit gab es zuletzt bei der Frage, wer das Protokoll schreibt.','Gleichstand auf ganzer Linie, alle bei {s} Euro. Ein Konsens, wie ihn sonst nur der Betriebsrat schafft.','Alle liegen bei {s} Euro. Niemand vorne, niemand hinten. Das ist kein Quiz mehr, das ist ein Arbeitskreis.'];
+const ROAST_OUT=['{n}, mir sind die Sprüche ausgegangen. Das hat vor dir noch niemand geschafft.','{n}, für dich bräuchte ich neue Sprüche. Die Redaktion ist informiert.'];
+let POOL=[],poolOk=false;
+const memUsed={};
+function usedList(k){let u=[];try{u=JSON.parse(ls.get(k)||'[]')}catch(e){}if(!Array.isArray(u))u=[];(memUsed[k]||[]).forEach(x=>{if(!u.includes(x))u.push(x)});return u}
+const fill=(t,v)=>String(t).replace(/\{(\w+)\}/g,(_,w)=>v[w]??'');
+/* strict=true: nie wiederholen. Ist alles verbraucht, kommt null zurück, statt von vorn anzufangen */
+function pickTpl(list,k,strict){let used=usedList(k);let free=list.filter(x=>!used.includes(x));if(!free.length){if(strict||!list.length)return null;used=[];memUsed[k]=[];free=list.slice()}const x=free[Math.floor(Math.random()*free.length)];used.push(x);memUsed[k]=used;ls.set(k,JSON.stringify(used));return x}
+const pickLine=(list,k,v,strict)=>{const t=pickTpl(list,k,strict);return t==null?null:fill(t,v)};
+const freshRoasts=()=>{const u=usedList('kp-used-roast');return ROASTS.filter(x=>!u.includes(x)).length};
+const restQ=set=>G?set.qs.filter((q,i)=>!q.dd&&!G.done.includes(set.id+'-'+i)).length:0;
+const cleanLine=x=>typeof x==='string'?x.replace(/\s*[\u2013\u2014]\s*/g,', ').replace(/\s+/g,' ').trim():'';
+const curDD=()=>(G&&cur()&&cur().dd)||DD;
+function setSteps(set){const DDx=set.dd;const p=[];set.qs.forEach((q,i)=>{if(q.dd){if(!DDx)return;p.push({k:'ddi',id:set.id+'-dd',dd:DDx});shuffle(DDx.items).forEach((it,j)=>p.push({k:'dd',id:set.id+'-dd',t:it[0],c:it[1],a:DDx.opts,n:j+1,of:DDx.items.length,val:500,dd:DDx}));p.push({k:'dde',id:set.id+'-dd',dd:DDx});return}{const qq=Object.assign({k:'q',id:set.id+'-'+i},q);if(Array.isArray(q.a)&&typeof q.c==='number'&&q.a[q.c]!=null){const o=shuffle(q.a.map((x,k)=>k));qq.a=o.map(k=>q.a[k]);qq.c=o.indexOf(q.c)}p.push(qq)}});return p}
+function playedMap(){let m={};try{m=JSON.parse(ls.get('kp-played')||'{}')}catch(e){}POOL.forEach(x=>{if(x.played&&!m[x.id])m[x.id]=x.played});return m}
+function markPlayed(id){let m={};try{m=JSON.parse(ls.get('kp-played')||'{}')}catch(e){}if(!m[id]){m[id]=new Date().toLocaleDateString('de-DE');ls.set('kp-played',JSON.stringify(m))}}
+function defaultSel(){if(G&&G.resume){const rs=POOL.find(x=>x.id===G.resume);if(rs){const r=restQ(rs),n=rs.qs.filter(q=>!q.dd).length;if(r>0&&r<n)return rs.id}}const pm=playedMap();const f=POOL.find(x=>!pm[x.id]);return (f||POOL[0]||{}).id||null}
+function refill(){for(const set of POOL){if(G.sel&&set.id!==G.sel)continue;const rest=setSteps(set).filter(x=>!G.done.includes(x.id));if(rest.length){G.plan.push(...rest);return true}}return false}
+function freshCount(){if(!G)return 0;return POOL.reduce((a,set)=>a+setSteps(set).filter(x=>x.k==='q'&&!G.done.includes(x.id)).length,0)}
+let poolSig='';
+async function loadPool(){try{const r=await fetch('questions.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();(j.sets||[]).forEach(set=>{if(set&&set.id&&Array.isArray(set.qs)&&!POOL.some(x=>x.id===set.id))POOL.push(set)});(Array.isArray(j.roasts)?j.roasts:[]).map(cleanLine).forEach(x=>{if(x&&!ROASTS.includes(x))ROASTS.push(x)});(Array.isArray(j.leads)?j.leads:[]).map(cleanLine).forEach(x=>{if(x&&!LEADS.includes(x))LEADS.push(x)});poolOk=true}catch(e){if(!poolOk&&!POOL.length){POOL.push({id:'p1',qs:QS,dd:DD},{id:'p2',qs:QS2,dd:DD2})}}
+  if(!G)return;
+  if(G.ph==='lobby'&&(!G.sel||!POOL.some(x=>x.id===G.sel)))G.sel=defaultSel();
+  const sig=POOL.map(x=>x.id).join(',')+'|'+ROASTS.length+'|'+G.sel;
+  if(G.ph==='wait'&&refill())next();else if(G.ph==='lobby'&&sig!==poolSig)hRender();
+  poolSig=sig}
+setInterval(()=>{if(mode==='host')loadPool()},40000);
+const FINALS=[
+{i:'',q:'Was bedeutet die Abkürzung PT in einem Beratungsangebot?',a:['Personentag','Projekttag','Pauschaltarif','Planungstermin'],c:0,r:'Personentag! Die Währung, in der wir alle denken. Auch heute Abend.'},
+{i:'',q:'Welches dieser Tools gehört NICHT zu Microsoft 365?',a:['Teams','SharePoint','Slack','Outlook'],c:2,r:'Slack! Das gehört zu Salesforce. Und wer jetzt Teams gedrückt hat: Wir müssen reden.'},
+{i:'',q:'Seit wann muss die DSGVO verbindlich angewendet werden?',a:['Mai 2016','Mai 2018','Januar 2020','Januar 2022'],c:1,r:'Seit dem 25. Mai 2018. In Kraft getreten ist sie schon 2016, aber die Schonfrist ist vorbei. Wie für manche Kontostände jetzt auch.'},
+{i:'',q:'Wofür steht das D in DSGVO?',a:['Daten','Datenschutz','Digital','Deutsche'],c:1,r:'Datenschutz-Grundverordnung. Wer Deutsche gedrückt hat: Es ist eine EU-Verordnung. Autsch.'}
+];
+const FIN_I='Und jetzt: das große Finale! Jeder entscheidet selbst auf seinem Handy, wie viel er setzt. Von nichts bis alles. Wer im Minus ist, darf bis zu 1.000 Euro riskieren. Richtig gewinnt den Einsatz dazu, falsch verliert ihn. Ihr habt 25 Sekunden zum Setzen.';
+const betMax=sc=>sc>0?sc:1000;
+function saveState(){if(!G)return;ls.set('kp-state',JSON.stringify({scores:G.scores,done:G.done,n:G.n,limit:G.limit,fdone:G.fdone,sel:G.sel,t:Date.now()}))}
+const hasPeer=typeof window.Peer==='function';
+let mode=null,wake=null;
+function keepAwake(){try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(w=>wake=w).catch(()=>{})}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&mode)keepAwake()});
+const hashCode=(location.hash||'').replace('#','').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+$('#asHost').onclick=()=>{mode='host';try{FX.init()}catch(e){};$('#pick').hidden=true;$('#tv').classList.add('on');keepAwake();hostInit();hostNet()};
+$('#asPlayer').onclick=()=>startPlayer('');
+
+/* ========== FX: Studio. Raster und Partikel in three.js, Lichtkegel als CSS-Ebenen auf dem Compositor ========== */
+const FX=(()=>{
+  const motionOk=!matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const gl=typeof window.THREE==='object'&&motionOk;
+  let R,S,C,pts,conf=[],speed=1,cs=1,ph=0,last=0,lastR=0,slow=0,lvl=0,running=false,off=false,talking=false,bw=null,anims=[];
+  function beams(){
+    if(!motionOk||bw)return;
+    bw=document.createElement('div');bw.id='beams';
+    [[15,'227,181,74',-17,9,11],[85,'92,155,214',16,-8,13],[50,'51,199,166',-9,9,17]].forEach(([x,c,a,b,d],i)=>{
+      const e=document.createElement('i');e.className='beam';e.style.left=x+'%';e.style.setProperty('--c',c);e.style.transform=`rotate(${(a+b)/2}deg)`;bw.append(e);
+      try{anims.push(e.animate([{transform:`rotate(${a}deg)`},{transform:`rotate(${b}deg)`}],{duration:d*1000,direction:'alternate',iterations:Infinity,easing:'ease-in-out',delay:-i*2700}))}catch(err){}
+    });
+    document.body.prepend(bw);document.body.classList.add('beamon');
+  }
+  function init(){
+    if(running)return;running=true;beams();
+    if(!gl)return;
+    let cv=null;
+    try{
+      cv=document.createElement('canvas');cv.id='fx';document.body.prepend(cv);
+      R=new THREE.WebGLRenderer({canvas:cv,antialias:false,alpha:true,powerPreference:'high-performance'});R.setPixelRatio(1);
+      S=new THREE.Scene();S.fog=new THREE.Fog(0x0a1422,18,60);
+      C=new THREE.PerspectiveCamera(55,1,.1,200);C.position.set(0,3.2,14);C.lookAt(0,2,0);
+      const g=new THREE.GridHelper(120,60,0x3f76bd,0x1b3150);g.position.y=-2;g.material.transparent=true;g.material.opacity=.5;S.add(g);
+      const N=520,pos=new Float32Array(N*3),col=new Float32Array(N*3),pal=[[.89,.71,.29],[.36,.61,.84],[.2,.78,.65],[.56,.52,.85]];
+      for(let i=0;i<N;i++){pos[i*3]=(Math.random()-.5)*70;pos[i*3+1]=Math.random()*30-2;pos[i*3+2]=-Math.random()*60+8;const c=pal[i%4];col.set(c,i*3)}
+      const pg=new THREE.BufferGeometry();pg.setAttribute('position',new THREE.BufferAttribute(pos,3));pg.setAttribute('color',new THREE.BufferAttribute(col,3));
+      pts=new THREE.Points(pg,new THREE.PointsMaterial({size:.11,vertexColors:true,transparent:true,opacity:.7,depthWrite:false,blending:THREE.AdditiveBlending}));S.add(pts);
+      document.body.classList.add('fxon');
+      addEventListener('resize',size);size();requestAnimationFrame(loop);
+    }catch(e){R=null;try{cv&&cv.remove()}catch(x){}}
+  }
+  function size(){if(!R)return;const w=innerWidth,h=innerHeight,sc=Math.min(1,1600/w)*(lvl>=2?.66:1);R.setSize(Math.round(w*sc),Math.round(h*sc),false);C.aspect=w/h;C.updateProjectionMatrix()}
+  function degrade(){lvl++;slow=0;if(lvl===1)pts.visible=false;else if(lvl===2)size()}
+  function loop(now){
+    requestAnimationFrame(loop);
+    if(off||document.hidden){last=0;return}
+    /* 30 Bilder pro Sekunde. Solange Kevin spricht, nur 15, damit die Stimme Vorrang hat. Konfetti läuft kurz mit 30 */
+    const want=(talking&&!conf.length)?66:33;
+    if(now-lastR<want-4)return;lastR=now;
+    const dt=last?Math.min(.1,(now-last)/1000):.033;last=now;const t=now/1000;
+    if(want===33&&lvl<2){if(dt>.05){if(++slow>75)degrade()}else if(slow>0)slow--}
+    cs+=(speed-cs)*Math.min(1,dt*1.5);ph+=dt*cs;
+    pts.rotation.y=ph*.02;pts.position.y=Math.sin(t*.3)*.3;
+    C.position.x=Math.sin(t*.12)*1.2;C.lookAt(0,2,0);
+    for(let i=conf.length-1;i>=0;i--){const p=conf[i],a=p.geometry.attributes.position,v=p.userData.v;p.userData.life-=dt;
+      const k=dt*60;for(let j=0;j<v.length/3;j++){v[j*3+1]-=.012*k;a.array[j*3]+=v[j*3]*k;a.array[j*3+1]+=v[j*3+1]*k;a.array[j*3+2]+=v[j*3+2]*k}
+      a.needsUpdate=true;p.material.opacity=Math.max(0,p.userData.life/2.2);p.rotation.z+=.004*k;if(p.userData.life<=0){S.remove(p);p.geometry.dispose();p.material.dispose();conf.splice(i,1)}}
+    R.render(S,C);
+  }
+  function flash(){if(bw&&!off)[...bw.children].forEach(e=>{try{e.animate([{opacity:1},{opacity:.6}],{duration:1400,easing:'ease-out'})}catch(err){}})}
+  function burst(hex,n){flash();if(!R||off||document.hidden||conf.length>5)return;n=Math.round((n||500)*(lvl?.5:.8));const pos=new Float32Array(n*3),v=new Float32Array(n*3),col=new Float32Array(n*3),base=new THREE.Color(hex||0xe3b54a),alt=[new THREE.Color(0xe3b54a),new THREE.Color(0xf3d488),new THREE.Color(0x5c9bd6),new THREE.Color(0xeef3fb)];
+    for(let i=0;i<n;i++){pos.set([0,1.5,2],i*3);const th=Math.random()*Math.PI*2,pp=Math.random()*Math.PI*.9,sp=.12+Math.random()*.32;v.set([Math.cos(th)*Math.sin(pp)*sp,Math.cos(pp)*sp+.12,Math.sin(th)*Math.sin(pp)*sp*.6],i*3);const c=Math.random()<.6?base:alt[i%4];col.set([c.r,c.g,c.b],i*3)}
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(pos,3));g.setAttribute('color',new THREE.BufferAttribute(col,3));
+    const p=new THREE.Points(g,new THREE.PointsMaterial({size:.13,vertexColors:true,transparent:true,opacity:1,depthWrite:false,blending:THREE.AdditiveBlending}));p.userData={v,life:2.2};S.add(p);conf.push(p)}
+  function toggle(){off=!off;const c=document.getElementById('fx');if(c)c.style.display=off?'none':'';if(bw)bw.style.display=off?'none':'';anims.forEach(a=>{try{off?a.pause():a.play()}catch(e){}});return off}
+  function mood(m){speed=m==='q'?1.6:m==='board'?1.25:m==='end'?1.4:1;anims.forEach(a=>{try{a.updatePlaybackRate(speed)}catch(e){}})}
+  return{init,toggle,burst,pulse:flash,mood,talk:b=>{talking=!!b}};
+})();
+function fanfare(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,.14),i*110))}
+
+/* ========== STIMME: Web Speech API mit Warteschlange, Satz-Chunks und Wachhund ========== */
+const SS=('speechSynthesis' in window&&typeof window.SpeechSynthesisUtterance==='function')?window.speechSynthesis:null;
+const RATE=1.05;
+let voice=null,voices=[],fbVoice=null,vSig='';
+const vNat=v=>/natural|online|neural/i.test(v.name);
+const vNet=v=>!!v&&(v.localService===false||vNat(v));
+const vShort=v=>v.name.replace(/\s+-\s+(German|Deutsch).*$/i,'');
+/* Reihenfolge der Auto-Auswahl (kleiner ist besser): Edge Online (Natural), dann Google Deutsch, dann lokale Stimmen */
+function vRank(v){const n=v.name,de=/^de[-_]DE/i.test(v.lang)?0:5;
+  if(vNat(v))return de+(/conrad/i.test(n)?0:/killian/i.test(n)?1:/florian/i.test(n)?2:/katja/i.test(n)?3:4);
+  if(/google/i.test(n))return 10+de;
+  return 20+de+(/katja/i.test(n)?0:/stefan/i.test(n)?1:/hedda/i.test(n)?2:/microsoft/i.test(n)?3:4)}
+function pickVoice(){
+  if(!SS)return;
+  try{
+    const all=SS.getVoices().filter(v=>/^de/i.test(v.lang)),sig=all.map(v=>v.name).join('|');
+    voices=all.slice().sort((a,b)=>vRank(a)-vRank(b));
+    /* Die von Hand gewählte Stimme (kp-voice) hat immer Vorrang, Auto-Auswahl nur ohne gespeicherte Wahl */
+    const want=ls.get('kp-voice'),nv=voices.find(x=>x.name===want)||voices[0]||null;
+    fbVoice=voices.find(x=>x.localService===true&&!vNat(x))||null;
+    const ch=sig!==vSig||(nv&&nv.name)!==(voice&&voice.name);voice=nv;vSig=sig;
+    if(ch&&G&&G.ph==='lobby')hRender();
+  }catch(e){}
+}
+if(SS){try{pickVoice();SS.addEventListener?SS.addEventListener('voiceschanged',pickVoice):(SS.onvoiceschanged=pickVoice)}catch(e){}[300,1200,3000,8000].forEach(ms=>setTimeout(pickVoice,ms))}
+const TTS=(()=>{
+  let job=null,wd=null,lastCancel=-1e9,keep=[],allFails=0,downUntil=0,fbUsed=0,onNote=()=>{};
+  const now=()=>performance.now();
+  /* Google-Netzwerkstimmen brechen in Chrome nach rund 15 Sekunden ab: dort kurze Chunks, sonst längere (weniger Lücken) */
+  const maxLen=v=>(v&&v.localService===false&&/google/i.test(v.name))?150:260;
+  const estMs=t=>500+t.length*68/RATE;
+  const clean=t=>String(t==null?'':t).replace(/\s*[\u2013\u2014]\s*/g,', ').replace(/[„“”"«»]/g,'').replace(/\s+/g,' ').trim();
+  const ABBR=/^(z\.B|bzw|ca|Nr|Dr|Prof|ggf|inkl|usw|etc|vs|St|evtl|max|min|Tel|Abs|Art|u\.a|d\.h|o\.ä)\.$/i;
+  function split(txt,max){
+    const words=txt.split(' '),sents=[];let buf='';
+    words.forEach((w,i)=>{buf+=(buf?' ':'')+w;const nx=words[i+1]||'';
+      if(/[.!?…]['’)]*$/.test(w)&&!/\d\.$/.test(w)&&!ABBR.test(w)&&(!nx||/^['’(]?[A-ZÄÖÜ0-9]/.test(nx))){sents.push(buf);buf=''}});
+    if(buf)sents.push(buf);
+    const parts=[];
+    /* Überlanger Satz: am letzten Komma vor der Grenze trennen, notfalls an einem Leerzeichen */
+    sents.forEach(s=>{while(s.length>max){let cut=-1,m;const re=/[,;:] /g;while((m=re.exec(s))&&m.index<max)cut=m.index+1;if(cut<max*.4){cut=s.lastIndexOf(' ',max);if(cut<1)cut=max}parts.push(s.slice(0,cut).trim());s=s.slice(cut).trim()}if(s)parts.push(s)});
+    const out=[];let c='';
+    parts.forEach(p=>{if(c&&c.length+1+p.length>max){out.push(c);c=p}else c+=(c?' ':'')+p});if(c)out.push(c);
+    return out;
+  }
+  function setTalk(b){try{document.body.classList.toggle('talk',b);FX.talk(b)}catch(e){}}
+  function hardCancel(){try{if(SS&&(SS.speaking||SS.pending)){SS.cancel();lastCancel=now()}}catch(e){}}
+  function settle(j,ms){if(j.done)return;j.done=true;j.run++;clearTimeout(j.startT);clearTimeout(j.dead);if(job===j){job=null;clearInterval(wd);wd=null;setTalk(false)}if(ms>0)setTimeout(j.res,ms);else j.res()}
+  const quietRest=j=>j.wait?Math.max(0,Math.min(9000,j.est)-(now()-j.t0)):0;
+  function queue(j){
+    if(j.done||job!==j)return;const run=++j.run,v=j.v;j.qAt=now();j.started=0;j.idle=0;
+    try{
+      for(let k=j.i;k<j.chunks.length;k++){const u=new SpeechSynthesisUtterance(j.chunks[k]);
+        u.lang=(v&&v.lang)||'de-DE';if(v)u.voice=v;u.rate=RATE;u.pitch=1;u.volume=1;
+        u.onstart=()=>{if(j.done||j.run!==run)return;j.i=k;j.started=now();j.cEst=estMs(j.chunks[k]);j.idle=0;j.lastB=0;j.nB=0;allFails=0};
+        u.onboundary=e=>{if(!j.done&&j.run===run&&(!e||!e.name||e.name==='word')){j.lastB=now();j.nB=(j.nB||0)+1}};
+        u.onend=()=>{if(j.done||j.run!==run)return;j.i=k+1;j.started=0;j.qAt=now();j.idle=0;if(j.i>=j.chunks.length)settle(j,0)};
+        u.onerror=e=>{if(j.done||j.run!==run)return;const c=e&&e.error;if(c==='interrupted'||c==='canceled')return;fail(j,k)};
+        keep.push(u);SS.speak(u)}
+      if(keep.length>30)keep.splice(0,keep.length-30);   /* Referenzen halten, sonst räumt Chrome die Utterance weg und onend kommt nie */
+    }catch(e){fail(j,j.i)}
+  }
+  /* Stimme startet nicht oder meldet einen Fehler: einmal neu versuchen (Online-Stimme: mit lokaler Ersatzstimme), dann still weiter */
+  function fail(j,k){
+    if(j.done)return;j.run++;if(k!=null)j.i=Math.max(j.i,k);try{SS.cancel();lastCancel=now()}catch(e){}
+    if(j.tries<1){j.tries++;if(vNet(j.v)&&fbVoice&&fbVoice!==j.v){j.v=fbVoice;fbUsed++;onNote()}j.started=0;j.qAt=0;j.startT=setTimeout(()=>queue(j),180);return}
+    if(++allFails>=2){downUntil=Date.now()+45000;onNote()}
+    settle(j,quietRest(j));
+  }
+  /* Chunk hängt mittendrin: abbrechen und mit dem nächsten Satz weitermachen, nichts doppelt sprechen */
+  function skip(j){
+    j.run++;try{SS.cancel();lastCancel=now()}catch(e){}
+    if(j.i+1>=j.chunks.length){settle(j,0);return}
+    if(vNet(j.v)&&fbVoice&&fbVoice!==j.v){j.v=fbVoice;fbUsed++;onNote()}   /* Online-Stimme hängt: den Rest dieses Textes spricht die lokale Ersatzstimme */
+    j.i++;j.started=0;j.qAt=0;j.startT=setTimeout(()=>queue(j),180);
+  }
+  function watch(){
+    const j=job;if(!j||j.done)return;const t=now();
+    try{if(SS.paused)SS.resume()}catch(e){}
+    if(!j.qAt)return;
+    let idle=false;try{idle=!SS.speaking&&!SS.pending}catch(e){}
+    if(j.started){
+      if(idle){if(++j.idle>=3)settle(j,0)}                       /* Ende-Ereignis verloren, Warteschlange ist aber leer */
+      else{j.idle=0;if(t-j.started>j.cEst*1.3+2000||(j.nB>=3&&t-j.lastB>6000))skip(j)}   /* hängt: zu lange für die Textlänge, oder die Wortmarken der Stimme bleiben seit sechs Sekunden aus */
+    }else{
+      if(idle){if(++j.idle>=3)fail(j,j.i)}                       /* Auftrag wurde verschluckt */
+      else{j.idle=0;if(t-j.qAt>(vNet(j.v)?4500:3000))fail(j,j.i)} /* Stimme kommt nicht */
+    }
+  }
+  function speak(txt,wait){
+    txt=clean(txt);const est=Math.min(20000,1500+txt.split(' ').length*380);
+    stop();
+    if(!txt)return Promise.resolve();
+    if(muted||!SS||Date.now()<downUntil)return new Promise(r=>setTimeout(r,wait?Math.min(9000,est):0));
+    return new Promise(res=>{
+      const v=voice,chunks=split(txt,maxLen(v));
+      const j={chunks,i:0,v,res,wait:!!wait,est,t0:now(),tries:0,run:0,qAt:0,started:0,idle:0,cEst:0,done:false};
+      job=j;setTalk(true);
+      j.dead=setTimeout(()=>{if(!j.done){j.run++;hardCancel();settle(j,0)}},chunks.reduce((a,c)=>a+estMs(c),0)*1.4+9000);
+      if(!wd)wd=setInterval(watch,300);
+      /* cancel() und speak() direkt hintereinander verschluckt Chrome gern: nach einem Abbruch kurz warten */
+      const d=lastCancel+150-now();if(d>0)j.startT=setTimeout(()=>queue(j),d);else queue(j);
+    });
+  }
+  function stop(why){const j=job;if(j&&!j.done)settle(j,why==='mute'?Math.min(4000,quietRest(j)):0);hardCancel()}
+  return{speak,stop,split,reset(){allFails=0;downUntil=0;fbUsed=0},status:()=>!SS?'none':Date.now()<downUntil?'down':fbUsed?'fb':'ok',busy:()=>!!job,onNote(f){onNote=f}};
+})();
+function say(txt,wait){return TTS.speak(txt,wait)}
+function hush(why){TTS.stop(why)}
+
+/* ========== HOST ========== */
+let G=null,muted=false,tick=null,beepCtx=null,peer=null,code=null,netOk=false,netErr='',idTries=0;
+const conns=new Map();
+function beep(f,d){try{beepCtx=beepCtx||new (window.AudioContext||window.webkitAudioContext)();if(beepCtx.state==='suspended')beepCtx.resume();const o=beepCtx.createOscillator(),g=beepCtx.createGain();o.frequency.value=f;g.gain.value=.12;o.connect(g);g.connect(beepCtx.destination);o.start();o.stop(beepCtx.currentTime+d)}catch(e){}}
+const gid=()=>Math.random().toString(36).slice(2,7);
+const byScore=(a,b)=>b[1].s-a[1].s;
+const num=n=>(n<0?'minus ':'')+Math.abs(n).toLocaleString('de-DE');
+const spk=n=>(n<0?'minus ':'')+Math.abs(n);
+const names=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' und '+a[a.length-1];
+function voiceNote(){const st=TTS.status(),b=$('#mute');b.textContent=muted?'Ton aus':st==='down'?'Stimme fehlt':'Ton an';b.classList.toggle('on',muted||st==='down');b.title=st==='down'?'Die Sprachausgabe antwortet nicht. Die Show läuft mit Text weiter, ich versuche es gleich wieder.':st==='fb'?'Die Online-Stimme hat gehakt, zwischendurch sprach die lokale Ersatzstimme.':'';if(G&&G.ph==='lobby')hRender()}
+TTS.onNote(()=>setTimeout(voiceNote,0));
+let auto=true,autoT=null;
+function autoNext(s,ms){clearTimeout(autoT);if(!auto)return;autoT=setTimeout(()=>{if(auto&&cur()===s&&G.ph==='rev')next()},ms)}
+$('#pause').onclick=()=>{auto=!auto;$('#pause').textContent=auto?'Auto an':'Auto aus';$('#pause').classList.toggle('on',!auto);if(!G)return;if(!auto){clearTimeout(autoT);hRender()}else if(cur()&&G.ph==='rev'){const s=cur();if(s.k==='q'){hRender();autoT=setTimeout(()=>{if(!auto||cur()!==s||G.ph!=='rev')return;s.cm?next():afterReveal(s)},1500)}else if(s.k==='dde')autoNext(s,1500)}else if(cur()&&G.ph==='board'){const s=cur();hRender();autoT=setTimeout(()=>{if(auto&&cur()===s&&G.ph==='board')next()},1500)}};
+/* Aktive Spieler: verbunden, nicht aus dem Spiel genommen, höchstens zwei Antworten in Folge verpasst */
+function actE(){const live=new Set(liveKeys());G.miss=G.miss||{};G.kick=G.kick||{};const e=Object.entries(G.scores).filter(([k])=>!G.kick[k]);const f=e.filter(([k])=>live.has(k)&&(G.miss[k]||0)<3);return f.length?f:e}
+function actV(){return actE().map(([,x])=>x)}
+function rankMap(){const m={},v=actE();v.forEach(([k,x])=>m[k]=1+v.filter(([,y])=>y.s>x.s).length);return m}
+/* Genau ein Kommentar pro Frage. Rhythmus nach Fragennummer der Runde: jede dritte Frage Lob für den Führenden, sonst Roast für den Letzten */
+function comment(s,big){
+  const r=actE().sort(byScore);
+  if(r.length<2&&!big)return null;   /* allein oder ohne Handys: Spruch nur zur großen Tafel, sonst zügig weiter */
+  const mk=(t,v)=>({show:fill(t,Object.assign({},v,{s:v.s==null?'':num(v.s),gap:v.gap==null?'':num(v.gap)})),say:fill(t,Object.assign({},v,{s:v.s==null?'':spk(v.s),gap:v.gap==null?'':spk(v.gap)}))});
+  if(!r.length)return mk('Zwischenstand ohne Mitspieler. So niedrig war die Fehlerquote noch nie.',{});
+  const top=r[0][1],last=r[r.length-1][1],praise=s.n%3===0;
+  if(r.length===1)return mk(pickTpl(praise?SOLO_LEAD:SOLO_ROAST,praise?'kp-used-solo-lead':'kp-used-solo-roast'),{n:top.n,s:top.s});
+  if(top.s===last.s)return mk(pickTpl(TIE_ALL,'kp-used-tie-all'),{s:top.s});
+  const tops=r.filter(([,x])=>x.s===top.s).map(([,x])=>x.n);
+  const lead=()=>tops.length>2?mk(pickTpl(TIE_MANY,'kp-used-tie-many'),{names:names(tops),s:top.s}):tops.length===2?mk(pickTpl(TIE_TOP,'kp-used-tie-top'),{n:top.n,m:r[1][1].n,s:top.s}):mk(pickTpl(LEADS,'kp-used-lead'),{n:top.n,s:top.s,gap:top.s-r[1][1].s,m:r[1][1].n});
+  if(praise)return lead();
+  /* Letzter Platz. Teilen sich mehrere den letzten Platz, trifft es den mit der schlechtesten letzten Antwort */
+  const lows=r.filter(([,x])=>x.s===last.s).map(([k,x])=>({x,d:G.last[k]==null?-1:G.last[k],z:Math.random()})).sort((a,b)=>a.d-b.d||a.z-b.z);
+  let t=pickTpl(ROASTS,'kp-used-roast',true);if(t==null)t=pickTpl(ROAST_OUT,'kp-used-roast-out',true);
+  if(t==null)return lead();
+  return mk(/\{n\}/.test(t)?t:'{n}, '+t,{n:lows[0].x.n});
+}
+/* Letzte Frage der Runde? Dann kein Zwischenstand mehr, sondern direkt der Endstand */
+function isLastQ(s){return !!s&&s.k==='q'&&!s.fin&&!G.final&&!G.finalNext&&G.n>=G.limit&&!G.plan.slice(G.step+1).some(x=>x.k==='ddi'||x.k==='dd'||x.k==='dde')}
+function afterReveal(s){if(cur()!==s||G.ph!=='rev'||s.cm)return;if(s.fin||isLastQ(s))endShow();else showBoard(s)}
+const bigBoard=s=>s.n===6||s.n===12;
+function endShow(){
+  hush();clearInterval(tick);clearTimeout(autoT);
+  const r=actE().sort(byScore);let line='Das war Kein Plan, Herr Berater.';G.endLine='';
+  if(r.length){const top=r[0][1],last=r[r.length-1][1],tops=r.filter(([,x])=>x.s===top.s).map(([,x])=>x.n);
+    line=tops.length>1?`Und damit ist es entschieden. Oder auch nicht: ${names(tops)} teilen sich den Sieg mit ${spk(top.s)} Euro. Das Statusmeeting morgen moderiert ihr gemeinsam.`:`Und damit ist es entschieden! Gewinner von Kein Plan, Herr Berater: ${top.n}, mit ${spk(top.s)} Euro! Herzlichen Glückwunsch, du darfst morgen das Statusmeeting moderieren.`;
+    if(r.length>1&&last.s<top.s){const t=pickTpl(ROASTS,'kp-used-roast',true);if(t!=null){G.endLine=fill(/\{n\}/.test(t)?t:'{n}, '+t,{n:last.n});line+=' '+G.endLine}}}
+  G.ph='end';FX.mood('end');FX.burst(0xe3b54a,900);setTimeout(()=>FX.burst(0x33c7a6,600),700);setTimeout(()=>FX.burst(0x5c9bd6,600),1400);hRender();hPub();beep(523,.15);setTimeout(()=>beep(659,.15),160);setTimeout(()=>beep(784,.4),320);saveState();
+  say(line);
+}
+/* Nach jeder Frage genau ein Spruch. Die große Punktetafel kommt nur nach Frage 6 und 12 der Runde, sonst bleibt die Auflösung stehen */
+function showBoard(s){
+  if(cur()!==s||G.ph!=='rev'||s.cm)return;clearTimeout(autoT);const big=bigBoard(s);
+  saveState();const c=comment(s,big);
+  if(!c){next();return}
+  s.cm=true;G.boardLine=c.show;
+  if(big){G.ph='board';FX.mood('board');FX.pulse();beep(660,.08);setTimeout(()=>beep(880,.12),120)}
+  const ph=G.ph;hRender();hPub();
+  say(c.say,true).then(()=>{if(auto&&cur()===s&&G.ph===ph)autoT=setTimeout(()=>{if(auto&&cur()===s&&G.ph===ph)next()},big?2500:700)});
+}
+function boardHtml(){
+  const r=actE().sort(byScore),pr=G.prevRank||{};const mx=Math.max(1,...r.map(([k,x])=>Math.abs(x.s)));
+  if(!r.length)return '<div class="hint">Noch keine Spieler verbunden.</div>';
+  const rows=r.map(([k,x],i)=>{const d=G.last[k],nr=1+r.filter(([,y])=>y.s>x.s).length,mv=pr[k]?pr[k]-nr:0;
+    return `<div class="brow${i===0?' lead':''}" data-k="${esc(k)}" data-to="${x.s}"><span class="bpos">${i+1}</span><span class="bname">${esc(x.n)}${mv>0?`<i class="up">▲${mv}</i>`:mv<0?`<i class="dn">▼${-mv}</i>`:''}</span><span class="bbar"><i${x.s<0?' class="m"':''} style="width:${Math.max(2,Math.abs(x.s)/mx*100)}%"></i></span><span class="bval">${eur(x.s)}</span><span class="bd ${d==null?'':d>=0?'pos':'neg'}">${d==null?'·':(d>=0?'+':'')+eur(d)}</span></div>`}).join('');
+  return `<div class="board${r.length>8?' c2':''}" style="--rows:${Math.ceil(r.length/2)}">${rows}</div>`;
+}
+function countUp(el,a,b,ms){const t0=performance.now();const f=t=>{if(!el.isConnected)return;const p=Math.min(1,Math.max(0,(t-t0)/ms)),e=1-Math.pow(1-p,3);el.textContent=eur(p<1?Math.round((a+(b-a)*e)/100)*100:b);if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)}
+/* Zwischenstand wie im Fernsehen: erst die alte Reihenfolge mit alten Beträgen, dann zählen die Konten hoch und die Zeilen tauschen die Plätze */
+function animateBoard(){
+  const bd=$('#stage .board');if(!bd)return;const rows=[...bd.querySelectorAll('.brow[data-k]')];if(rows.length<1)return;
+  const ps=G.prevScore||{},now=rows.map(r=>r.dataset.k),old=(G.prevOrder||[]).filter(k=>now.includes(k));now.forEach(k=>{if(!old.includes(k))old.push(k)});
+  const rect=rows.map(r=>r.getBoundingClientRect());
+  rows[0].style.transform='translate(0,100px)';const f=(rows[0].getBoundingClientRect().top-rect[0].top)/100||1;rows[0].style.transform='';   /* Maßstab der Bühne (fit) herausrechnen */
+  const from=k=>k in ps?ps[k]:null,mx=Math.max(1,...rows.map(r=>Math.abs(+r.dataset.to)),...rows.map(r=>Math.abs(from(r.dataset.k)||0)));
+  const wd=v=>Math.max(2,Math.abs(v)/mx*100)+'%';
+  bd.classList.add('pre');
+  rows.forEach((row,i)=>{const k=row.dataset.k,oi=old.indexOf(k),f=from(k),to=+row.dataset.to,bar=row.querySelector('.bbar i');
+    row.querySelector('.bpos').textContent=oi+1;
+    if(oi!==i)row.style.transform=`translate(${(rect[oi].left-rect[i].left)/f}px,${(rect[oi].top-rect[i].top)/f}px)`;
+    if(f!=null&&f!==to){row.querySelector('.bval').textContent=eur(f);bar.style.transition='none';bar.style.width=wd(f);bar.classList.toggle('m',f<0)}
+  });
+  setTimeout(()=>{if(!bd.isConnected)return;bd.classList.remove('pre');
+    rows.forEach((row,i)=>{const k=row.dataset.k,f=from(k),to=+row.dataset.to,bar=row.querySelector('.bbar i');
+      row.querySelector('.bpos').textContent=i+1;row.style.transition='transform .8s cubic-bezier(.3,.8,.2,1)';row.style.transform='';
+      bar.style.transition='';bar.style.width=wd(to);bar.classList.toggle('m',to<0);
+      if(f!=null&&f!==to)countUp(row.querySelector('.bval'),f,to,900)});
+  },850);
+}
+$('#fxb').onclick=()=>{const o=FX.toggle();$('#fxb').textContent=o?'Effekte aus':'Effekte an';$('#fxb').classList.toggle('on',o)};
+$('#mute').onclick=()=>{muted=!muted;if(muted)hush('mute');voiceNote()};
+function hostInit(reset){hush();   /* räumt auch eine Sprachwarteschlange ab, die Chrome über ein Neuladen hinweg behalten hat */
+  let st=null;try{st=JSON.parse(ls.get('kp-state')||'null')}catch(e){}if(reset||!st||typeof st!=='object'||!st.scores||Date.now()-st.t>8*3600e3)st=null;clearInterval(tick);clearTimeout(autoT);G={id:gid(),step:-1,plan:[],resume:st&&typeof st.sel==='string'?st.sel:null,scores:st?st.scores:{},done:st&&Array.isArray(st.done)?st.done:[],n:st?st.n|0:0,restored:!!st,limit:st&&st.limit?st.limit:20,fdone:st&&st.fdone?st.fdone:[],ans:{},ph:'lobby',last:{},sel:null,miss:{},kick:{}};for(const x of conns.values()){x.r=null;x.a=null}hCollect();if(reset)saveState();G.sel=defaultSel();hRender();hPub();loadPool()}
+function newCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];return s}
+function hostNet(fresh){
+  if(!hasPeer){netErr='Die Verbindungsbibliothek konnte nicht geladen werden.';return hRender()}
+  code=(!fresh&&ls.get('kp-host-code'))||newCode();ls.set('kp-host-code',code);
+  const p=peer=new Peer(PFX+code,{debug:0});
+  p.on('open',()=>{if(peer!==p)return;idTries=0;netOk=true;netErr='';hRender()});
+  p.on('connection',c=>{
+    c.on('open',()=>{conns.set(c.peer,{c,name:null,r:null,a:null});sendTo(c)});
+    c.on('data',d=>onMsg(c.peer,d));
+    c.on('close',()=>{const x=conns.get(c.peer);if(x&&x.c===c){conns.delete(c.peer);onChange()}});
+    c.on('error',()=>{});
+  });
+  p.on('disconnected',()=>{if(peer!==p)return;netOk=false;hRender();setTimeout(()=>{try{if(peer===p&&!p.destroyed)p.reconnect()}catch(e){}},1000)});
+  /* Nach einem Neuladen ist der alte Show-Code oft noch ein paar Sekunden belegt: erst denselben Code erneut versuchen, damit die Handys wieder andocken können */
+  p.on('error',e=>{if(peer!==p)return;if(e.type==='unavailable-id'){try{p.destroy()}catch(x){}netOk=false;if(++idTries<=4){netErr='Der Show-Code ist noch belegt. Ich versuche es gleich noch einmal.';hRender();setTimeout(()=>{if(peer===p)hostNet(false)},1500)}else{idTries=0;hostNet(true)}}else if(e.type==='network'||e.type==='server-error'||e.type==='socket-error'){netOk=false;netErr='Verbindung zum Vermittlungsserver hakt. Ich versuche es weiter.';hRender()}});
+  hRender();
+}
+function joinUrl(){return location.origin+location.pathname+'#'+code}
+function onMsg(id,d){
+  const x=conns.get(id);if(!x||!d||typeof d!=='object')return;
+  if(d.t==='hi'&&typeof d.name==='string'){
+    const nm=d.name.replace(/\s+/g,' ').trim().slice(0,20),cid=typeof d.cid==='string'&&d.cid?d.cid.slice(0,40):null;x.cid=cid;x.want=nm;x.name=nm;x.alias=false;
+    if(cid&&key(nm)){
+      /* Dasselbe Handy meldet sich mit demselben Namen neu an (Neuladen, QR erneut gescannt): alte Verbindung ersetzen.
+         Namensvetter auf einem anderen Handy bekommen eine Nummer, statt sich unbemerkt ein Konto zu teilen. Handys ohne cid (ältere Seite) laufen wie bisher */
+      for(const [pid,o] of [...conns])if(pid!==id&&o.cid===cid&&(key(o.want)===key(nm)||key(o.name)===key(nm)))conns.delete(pid);
+      const taken=k=>[...conns].some(([pid,o])=>pid!==id&&o.name&&o.cid&&o.cid!==cid&&key(o.name)===k);
+      let cand=nm,i=1;while(taken(key(cand))&&i<20){i++;cand=nm.slice(0,17)+' '+i}
+      if(cand!==nm){x.name=cand;x.alias=true}
+    }
+    sendTo(x.c);
+  }
+  if(d.t==='ans'&&typeof d.r==='string'&&Number.isInteger(d.a)){x.r=d.r;x.a=d.a}
+  if(d.t==='bet'&&typeof d.r==='string'&&Number.isFinite(d.v)){x.br=d.r;x.bv=d.v}
+  onChange();
+}
+function onChange(){if(!G)return;hCollect();if(G.ph==='lobby')hRender();else hScore()}
+function livePlayers(){return [...conns.values()].filter(x=>x.name&&key(x.name))}
+function liveKeys(){return [...new Set(livePlayers().map(p=>key(p.name)))]}
+function hCollect(){
+  const rid=G.id+'-'+G.step;
+  for(const p of livePlayers()){
+    const k=key(p.name);
+    if(!G.scores[k]){G.scores[k]={n:p.name,s:0};hPubSoon()}
+    if(G.ph==='q'&&p.r===rid&&Number.isInteger(p.a)&&p.a>=0&&p.a<(cur().a||[]).length&&!G.ans[k]){G.ans[k]={a:p.a,t:Date.now()-G.t0};beep(740,.05)}
+    if(G.ph==='bet'&&p.br===rid&&!(k in G.bets)){G.bets[k]=Math.max(0,Math.min(Math.round(p.bv),betMax(G.scores[k].s)));beep(600,.05);if(G.ph==='bet')hRender()}
+  }
+  if(G.ph==='bet'){const ks=actE().map(([k])=>k);if(ks.length&&ks.every(k=>k in G.bets)){const s=cur();setTimeout(()=>endBet(s),800)}}
+  if(G.ph==='q'){const live=liveKeys().filter(k=>!(G.kick&&G.kick[k])&&((G.miss&&G.miss[k])||0)<3);if(live.length&&live.every(k=>G.ans[k]))hReveal()}
+}
+let pubT=null;function hPubSoon(){clearTimeout(pubT);pubT=setTimeout(hPub,50)}
+function cur(){return G.plan[G.step]}
+function state(){
+  const s=cur()||{};
+  const sc=actV().sort((a,b)=>b.s-a.s).slice(0,40).map(x=>[x.n,x.s,G.last[key(x.n)]==null?null:G.last[key(x.n)]]);
+  return {role:'host',g:G.id,ph:G.ph,r:G.id+'-'+G.step,k:s.k||'',lab:hLabel(),t:s.k==='q'?s.q:s.k==='dd'?s.t:'',a:s.a||[],left:G.left||0,c:G.ph==='rev'&&s.c!=null?s.c:null,sc};
+}
+/* Zusatzfeld you: nur für Handys, die der Host umbenennen musste. Ältere Handys ignorieren es */
+function sendTo(c){try{if(!c.open)return;const st=state(),x=conns.get(c.peer);if(x&&x.alias&&x.c===c)st.you=x.name;c.send(st)}catch(e){}}
+function hPub(){if(!G)return;for(const x of conns.values())sendTo(x.c)}
+function hLabel(){const s=cur();if(G.ph==='lobby')return 'Lobby';if(G.ph==='end')return 'Endstand';if(G.ph==='bet')return 'Finale · Einsätze';if(G.ph==='wait')return 'Kurze Pause';if(!s)return '';if(s.k==='q'&&s.fin)return 'Finale · Alles oder nichts';if(s.k==='q')return `Frage ${s.n} von ${G.limit-(G.base||0)} · ${eur(s.val)}`;if(s.k==='fi')return 'Finale';return 'Dis oder Dat'}
+function next(){
+  hush();clearInterval(tick);clearTimeout(autoT);G.last={};
+  if(G.step<0){
+    /* Rundenstart: frische Runden-ID, damit keine Antwort aus der Vorrunde mitgezählt wird, und alle sind wieder in der Wertung */
+    G.id=gid();G.miss={};G.final=false;G.finalNext=false;for(const x of conns.values()){x.r=null;x.a=null;x.br=null}
+    const set=G.sel&&POOL.find(x=>x.id===G.sel);
+    if(set){const cnt=()=>setSteps(set).filter(x=>x.k==='q'&&!G.done.includes(x.id)).length;if(!cnt())G.done=G.done.filter(id=>!String(id).startsWith(G.sel+'-'));G.plan=[];G.base=G.n;G.limit=G.n+Math.max(1,cnt());markPlayed(G.sel)}
+    else{G.sel=null;if(G.n>=G.limit){G.base=G.n;G.limit=G.n+20}}
+  }
+  /* Das Finale mit Einsätzen ist abgeschaltet (G.finalNext wird nirgends mehr gesetzt). Nach der letzten Frage geht es direkt zum Endstand */
+  if(!G.final&&(G.finalNext||G.n>=G.limit)){const c=cur();const inDD=c&&(c.k==='dd'||c.k==='ddi');if(!inDD&&!G.finalNext){endShow();return}if(!inDD){G.final=true;G.finalNext=false;const SF=G.sel&&(POOL.find(x=>x.id===G.sel)||{}).final;const F=SF?Object.assign({i:''},SF):(FINALS.find((f,i)=>!G.fdone.includes(i))||FINALS[0]);if(!SF)G.fdone.push(FINALS.indexOf(F));G.plan.splice(G.step+1,0,{k:'fi',id:'fin-i'},Object.assign({k:'q',fin:1,id:'fin-q',val:0},F))}}
+  if(G.step+1>=G.plan.length&&!refill()){G.ph='wait';hRender();hPub();say('Kurze Pause. Ich hole neue Fragen aus dem Backlog. Holt euch was zu trinken.',true);loadPool();return}
+  G.step++;const s=cur();if(s.k!=='dd'&&!s.fin&&s.k!=='fi'&&!G.done.includes(s.id))G.done.push(s.id);
+  if(s.k==='fi'){G.ph='fin';FX.burst(0xe3b54a,900);hRender();hPub();say(FIN_I,true).then(()=>{if(cur()===s&&G.ph==='fin')startBet(s)});return}
+  if(s.k==='q'&&!s.fin){G.n++;s.n=G.n-(G.base||0);s.val=s.n<=6?1000:s.n<=13?2000:3000}
+  if(s.fin){G.ph='read';hRender();hPub();say('Die Finalfrage. '+s.q,true).then(()=>{if(cur()===s&&G.ph==='read')ask(20)});return}
+  if(s.k==='ddi'){FX.mood('read');FX.burst(0x8e84d8,600);G.ph='intro';hRender();hPub();say(curDD().i,true).then(()=>{if(cur()===s&&G.ph==='intro')next()});return}
+  if(s.k==='dde'){FX.mood('rev');G.ph='rev';hRender();hPub();say(curDD().end,true).then(()=>{if(cur()===s&&G.ph==='rev')autoNext(s,2500)});return}
+  if(s.k==='dd'){say(s.t);ask(6);return}
+  G.ph='read';FX.mood('read');hRender();hPub();
+  say((s.i?s.i+' ':'')+s.q,true).then(()=>{if(cur()===s&&G.ph==='read')ask(16)});
+}
+/* Ring und Zeitbalken laufen pro Bild über requestAnimationFrame mit, unabhängig von CSS-Animationen und vom Sekundentakt */
+let timerRaf=0;
+function runTimer(){cancelAnimationFrame(timerRaf);const f=()=>{if(!G||(G.ph!=='q'&&G.ph!=='bet')||!G.dur)return;const k=Math.max(0,Math.min(1,(Date.now()-G.t0)/G.dur)),c=$('#rgc'),b=$('#tline i');if(c)c.style.strokeDashoffset=(276.46*k).toFixed(1);if(b)b.style.transform='scaleX('+(1-k).toFixed(4)+')';timerRaf=requestAnimationFrame(f)};f()}
+function updTimer(low){const n=$('#rgn'),r=$('#ring'),b=$('#tline');if(n)n.textContent=G.left;if(r)r.classList.toggle('low',G.left<=low);if(b)b.classList.toggle('low',G.left<=low)}
+function startBet(s){
+  G.ph='bet';G.bets={};G.t0=Date.now();G.dur=25000;G.left=25;G.low=5;hRender();hPub();beep(660,.12);
+  tick=setInterval(()=>{const l=Math.max(0,Math.ceil((G.t0+G.dur-Date.now())/1000));
+    if(l!==G.left){G.left=l;updTimer(5);if(l<=5&&l>0)beep(440,.06);hPub()}if(l<=0)endBet(s)},200);
+  hCollect();
+}
+function endBet(s){if(G.ph!=='bet'||cur()!==s)return;clearInterval(tick);next()}
+function ask(sec){
+  G.ph='q';FX.mood('q');G.ans={};G.t0=Date.now();G.dur=sec*1000;G.left=sec;G.low=3;hRender();hPub();beep(880,.12);
+  tick=setInterval(()=>{const l=Math.max(0,Math.ceil((G.t0+G.dur-Date.now())/1000));
+    if(l!==G.left){G.left=l;updTimer(3);if(l<=3&&l>0)beep(440,.06);hPub()}if(l<=0)hReveal()},200);
+  hCollect();
+}
+function hReveal(){
+  if(G.ph!=='q')return;clearInterval(tick);G.ph='rev';const s=cur();G.prevRank=rankMap();G.prevOrder=actE().sort(byScore).map(([k])=>k);G.prevScore={};for(const k in G.scores)G.prevScore[k]=G.scores[k].s;
+  const liveK=new Set(actE().map(([k])=>k));G.miss=G.miss||{};if(!s.fin)for(const k of liveKeys())G.miss[k]=G.ans[k]?0:(G.miss[k]||0)+1;
+  for(const k in G.scores){const a=G.ans[k];if(s.fin){if(!liveK.has(k))continue;const st=(G.bets&&G.bets[k])||0,okf=a&&a.a===s.c;const d=okf?st:-st;G.scores[k].s+=d;G.last[k]=d;continue}if(!a){G.last[k]=null;continue}
+    const ok=a.a===s.c;let d;
+    if(s.k==='dd')d=ok?500:-500;else d=ok?Math.round(s.val*(.5+.5*Math.max(0,1-a.t/G.dur))/100)*100:-s.val/2;
+    G.scores[k].s+=d;G.last[k]=d}
+  saveState();FX.mood('rev');hRender();hPub();
+  /* Die Kacheln lösen nach einer knappen halben Sekunde auf, Fanfare und Konfetti kommen genau dann */
+  const any=Object.values(G.ans).some(a=>a.a===s.c);
+  setTimeout(()=>{if(cur()!==s||G.ph!=='rev')return;if(any){FX.burst(0xe3b54a,s.k==='dd'?200:520);fanfare()}else beep(196,.25)},s.k==='dd'?0:450);
+  if(s.fin){say(s.r,true).then(()=>setTimeout(()=>{if(cur()===s&&G.ph==='rev')endShow()},1500))}else if(s.k==='dd'){setTimeout(()=>{if(cur()===s&&G.ph==='rev')next()},2400)}else say(s.r,true).then(()=>{if(auto&&cur()===s&&G.ph==='rev'&&!s.cm)autoT=setTimeout(()=>afterReveal(s),1200)});
+}
+function qrSvg(txt){try{const q=qrcode(0,'M');q.addData(txt);q.make();return q.createSvgTag({cellSize:6,margin:0,scalable:true})}catch(e){return ''}}
+function podHtml(r){
+  if(!r.length)return '<div class="podium"><div><span>Keine Handys dabei</span><span>Ehre: unbezahlbar</span></div></div>';
+  const top=r.slice(0,3),order=top.length===3?[1,0,2]:top.length===2?[1,0]:[0],rk=x=>1+r.filter(y=>y.s>x.s).length;
+  return `<div class="pod">${order.map(i=>{const x=top[i];return `<div class="pcol p${Math.min(3,rk(x))}"><div class="pinfo"><span class="pname">${esc(x.n)}</span><span class="pamt">${eur(x.s)}</span></div><div class="pstep"><b>${rk(x)}</b></div></div>`}).join('')}</div>`+(r.length>3?`<div class="rest">${r.slice(3).map(x=>`<span><b>${rk(x)}.</b> ${esc(x.n)}<em>${eur(x.s)}</em></span>`).join('')}</div>`:'');
+}
+function progHtml(s){const tot=Math.max(1,G.limit-(G.base||0));if(tot>40||!s||!s.n)return '';let h='';for(let i=1;i<=tot;i++)h+=`<i class="${i<s.n?'d':i===s.n?'c':''}${i>13?' t3':i>6?' t2':''}"></i>`;return `<span class="prog" aria-hidden="true">${h}</span>`}
+function hRender(){
+  const fk=G.step+'|'+G.ph;const fresh=fk!==G.lastFk;G.lastFk=fk;
+  $('#tLab').textContent=hLabel();$('#tCode').textContent=code&&G.ph!=='lobby'?'Code '+code:'';document.body.dataset.ph=G.ph;
+  const s=cur(),st=$('#stage');
+  const goBox=`<div class="gobox"><button class="btn" id="go" style="padding:16px 30px">Weiter</button><span class="auto">${auto?'geht automatisch weiter':'Auto aus: Leertaste'}</span></div>`;
+  if(G.ph==='lobby'){
+    const ps=liveKeys().map(k=>livePlayers().find(p=>key(p.name)===k)),pm=playedMap(),vst=TTS.status();
+    const vinfo=!SS?'Dieser Browser kann nicht sprechen. Die Show läuft dann nur mit Text.':!voice?'Keine deutsche Stimme gefunden. Der Browser nimmt seine Standardstimme.':vst==='down'?'Die Sprachausgabe antwortet gerade nicht. Die Show läuft mit Text weiter.':vNet(voice)?'Online-Stimme: braucht stabiles Netz. Falls sie stockt, hier eine lokale Stimme wählen.':'Lokale Stimme: läuft offline, unabhängig vom WLAN.';
+    st.innerHTML=`<div class="marq" style="font-size:clamp(36px,5vw,84px)">Kein Plan, <em>Herr Berater</em></div>
+      <div class="lgrid">
+        <div class="ljoin"><div class="qr">${code&&netOk?qrSvg(joinUrl()):''}</div>
+          <div><div class="hint">QR-Code scannen oder Code eingeben</div><div class="code">${netOk?esc(code):'…'}</div>
+          <div class="hint small" style="max-width:30ch;margin-top:6px">${netOk?'Schnelle richtige Antworten bringen mehr Tagessatz, falsche kosten die Hälfte.':esc(netErr||'Verbinde mit dem Vermittlungsserver …')}</div></div></div>
+        <div class="lside">
+          <div class="hint">Im Studio: ${ps.length}</div>
+          <div class="players">${ps.length?ps.map(p=>`<div class="pl">${esc(p.name)}</div>`).join(''):'<div class="hint">Noch niemand da.</div>'}</div>
+          <div class="hint">Runde wählen:</div>
+          <div class="rounds">${POOL.length?POOL.map(x=>{const qn=x.qs.filter(q=>!q.dd).length;return `<button class="rnd${x.id===G.sel?' on':''}${pm[x.id]?' done':''}" data-set="${esc(x.id)}"><b>${esc(x.name||x.id)}</b><span>${qn} Fragen${x.dd?' + Dis oder Dat':''}</span><em>${(r=>r>0&&r<qn?'läuft: noch '+r+' Fragen':pm[x.id]?'gespielt '+esc(pm[x.id]):'neu')(restQ(x))}</em></button>`}).join(''):'<span class="hint">Lade Runden …</span>'}</div>
+          <div class="meta">Stimme: <select id="vsel" class="ibtn" aria-label="Stimme">${voices.map(v=>`<option value="${esc(v.name)}"${voice&&v.name===voice.name?' selected':''}>${esc(vShort(v))} · ${vNet(v)?'online':'lokal'}</option>`).join('')||'<option value="">Standard</option>'}</select><button class="ibtn" id="vtest">Test</button>${voice?`<span class="vtag ${vNet(voice)?'net':'loc'}" id="vtag">${vNet(voice)?'online':'lokal'}</span>`:''}</div>
+          <div class="hint small" id="vinfo">${vinfo}</div>
+          <div class="meta small">Kontostand: ${Object.values(G.scores).some(x=>x.s)?'läuft weiter':'alle bei 0'} <button class="ibtn" id="reset">Kontostände auf 0</button><span>Roasts: ${freshRoasts()} von ${ROASTS.length} frisch</span><button class="ibtn" id="rreset">Sprüche zurücksetzen</button></div>
+          <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><button class="btn" id="go" style="padding:18px 40px">Show starten</button><span class="hint small">Danach läuft alles automatisch. P = Pause, Leertaste = weiter</span></div>
+        </div>
+      </div>`;
+  }else if(G.ph==='bet'){
+    const r=actE().sort(byScore);
+    st.innerHTML=`<div class="meta"><span class="pill">Finale</span><span>Setzt eure Einsätze auf dem Handy!</span></div><div class="tbarline" id="tline"><i class="run"></i></div>
+      <div class="marq big">Wie viel <em>riskiert ihr?</em></div>
+      <div class="board">${r.map(([k,x],i)=>`<div class="brow${k in G.bets?' lead':''}"><span class="bpos">${i+1}</span><span class="bname">${esc(x.n)}</span><span class="bbar"></span><span class="bval">${eur(x.s)}</span><span class="bd ${k in G.bets?'pos':''}">${k in G.bets?'gesetzt ✓':'überlegt …'}</span></div>`).join('')}</div>`;
+  }else if(G.ph==='fin'){
+    st.innerHTML=`<div class="marq big">Finale: <em>Alles oder nichts</em></div><div class="quip">${esc(FIN_I)}</div>${boardHtml()}`;
+  }else if(G.ph==='intro'){
+    st.innerHTML=`<div class="meta"><span class="pill">Sonderrunde</span><span>Sechs Sekunden pro Begriff · 500 € rauf oder runter</span></div><div class="marq big">Dis oder <em>Dat</em></div><div class="qtext">${esc(curDD().opts.join(' oder '))}?</div><div class="quip">${esc(curDD().i)}</div>`;
+  }else if(G.ph==='end'){
+    const r=actV().sort((a,b)=>b.s-a.s),tops=r.filter(x=>x.s===r[0].s).map(x=>x.n),set=POOL.find(x=>x.id===G.sel);
+    st.innerHTML=`<div class="meta" style="justify-content:center"><span class="pill">Endstand</span>${set&&set.name?`<span>Runde: ${esc(set.name)}</span>`:''}</div>
+      <div class="marq" style="font-size:clamp(34px,4.6vw,76px);text-align:center">${!r.length?'Endstand':tops.length>1?`Geteilter Sieg: <em>${esc(names(tops))}</em>`:`Sieg für <em>${esc(r[0].n)}</em>`}</div>
+      ${podHtml(r)}
+      ${G.endLine?`<div class="quip" style="align-self:center">${esc(G.endLine)}</div>`:''}
+      <div class="endrow"><button class="btn" id="cont" style="padding:16px 32px">Nächste Runde wählen</button><button class="btn ghost" id="again" style="padding:16px 26px">Neues Spiel, alles auf 0</button></div>`;
+  }else if(G.ph==='wait'){
+    st.innerHTML=`<div class="meta"><span class="pill">Kurze Pause</span><span>Kevin holt neue Fragen aus dem Backlog. Es geht automatisch weiter.</span></div>
+      <div class="marq h2">Zwischenstand</div>${boardHtml()}
+      <div style="display:flex;gap:12px"><button class="btn" id="showEnd" style="padding:16px 30px">Endstand zeigen</button></div>`;
+  }else if(G.ph==='board'){
+    const r=actV().sort((a,b)=>b.s-a.s);
+    st.innerHTML=`<div class="meta"><span class="pill">Kontostand nach Frage ${s.n}</span>${progHtml(s)}${r.length>1?`<span>Abstand Platz 1 zu 2: ${eur(r[0].s-r[1].s)}</span>`:''}</div>
+      <div class="marq h2">Wer hat den höchsten <em>Tagessatz</em>?</div>${boardHtml()}
+      <div class="slot">${G.boardLine?`<div class="quip">${esc(G.boardLine)}</div>`:''}${goBox}</div>`;
+  }else if(s.k==='dde'){
+    st.innerHTML=`<div class="marq big">Dis oder Dat: <em>vorbei</em></div><div class="slot"><div class="quip">${esc(curDD().end)}</div>${goBox}</div>`;
+  }else{
+    const rev=G.ph==='rev',dd=s.k==='dd';
+    const chose=i=>{const n=Object.entries(G.ans).filter(([k,a])=>a.a===i).map(([k])=>G.scores[k]?G.scores[k].n:k);return n.length>5?esc(n.slice(0,4).join(', '))+' +'+(n.length-4):esc(n.join(', '))};
+    const cards=s.a.map((t,i)=>`<div class="an${rev?(i===s.c?' ok':' no'):''}" style="--c:${ACOL[i]};--i:${i}">${dd?'':`<span class="l">${LET[i]}</span>`}<span class="tx">${esc(t)}${rev?`<span class="who">${chose(i)||(i===s.c?'niemand':'&nbsp;')}</span>`:''}</span>${rev&&!dd&&i===s.c?'<span class="tick">✓</span>':''}</div>`).join('');
+    const line=`<div class="tbarline" id="tline">${G.ph==='q'?`<i class="run"></i>`:''}</div>`;
+    if(dd){
+      st.innerHTML=`<div class="meta"><span class="pill">Dis oder Dat ${s.n}/${s.of}</span><span>${esc(curDD().opts.join(' oder '))}?</span></div>
+        ${line}<div class="item">${esc(s.t)}</div><div class="dd">${cards}</div>`;
+    }else{
+      st.innerHTML=`<div class="meta"><span class="pill">${esc(hLabel())}</span>${progHtml(s)}</div>
+        ${line}<div class="qtext">${esc(s.q)}</div><div class="ans">${cards}</div>
+        <div class="slot">${G.ph==='read'?(s.i?`<div class="quip">${esc(s.i)}</div>`:''):rev?`<div class="quip${s.cm?' swap':''}">${esc(s.cm&&G.boardLine?G.boardLine:s.r)}</div>${goBox}`:`<span class="hint" id="cnt"></span>`}</div>`;
+    }
+  }
+  const vs=$('#vsel');if(vs){vs.onchange=()=>{if(vs.value){ls.set('kp-voice',vs.value);TTS.reset();pickVoice();voiceNote()}};$('#vtest').onclick=()=>{TTS.reset();say('Willkommen bei Kein Plan, Herr Berater! Ich bin Kevin vom Helpdesk, und heute geht es um euren Tagessatz.')}}
+  document.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{G.sel=b.dataset.set;hRender()});
+  const rs=$('#reset');if(rs)rs.onclick=()=>{if(G.ph==='lobby'){G.scores={};G.n=0;G.limit=20;G.restored=false;G.kick={};G.miss={};hCollect();saveState();hRender();hPub()}};
+  const rr=$('#rreset');if(rr)rr.onclick=()=>{['kp-used-roast','kp-used-roast-out','kp-used-lead'].forEach(k=>{memUsed[k]=[];ls.set(k,'[]')});hRender()};
+  const sh=$('#showEnd');if(sh)sh.onclick=endShow;
+  const cn=$('#cont');if(cn)cn.onclick=()=>{hush();clearInterval(tick);clearTimeout(autoT);G.final=false;G.finalNext=false;G.step=-1;G.plan=[];G.ph='lobby';G.last={};G.endLine='';G.sel=defaultSel();FX.mood('lobby');saveState();hRender();hPub()};
+  if(G.ph!=='lobby'&&G.ph!=='wait'){const fr=document.createElement('div');fr.className='frame';st.prepend(fr)}
+  if(G.ph==='q'||G.ph==='bet'){const rg=document.createElement('div');rg.className='ring';rg.id='ring';rg.innerHTML=`<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="bg" cx="50" cy="50" r="44"/><circle class="tk" cx="50" cy="50" r="49"/><circle class="fg" id="rgc" cx="50" cy="50" r="44"/></svg><b id="rgn"></b>`;st.append(rg);updTimer(G.low||3);runTimer()}
+  if(fresh&&G.ph==='read'&&s&&s.k==='q'){const sp=document.createElement('div');sp.className='splash';sp.innerHTML=s.fin?'<div><b>FINALE</b><span>Alles oder nichts</span></div>':`<div><b>Frage ${s.n}</b><span>${eur(s.val)}</span></div>`;st.prepend(sp);setTimeout(()=>sp.remove(),1900);beep(330,.1);setTimeout(()=>beep(495,.18),140)}
+  st.classList.toggle('fresh',fresh);st.classList.toggle('sp',!!st.querySelector('.splash'));st.classList.toggle('qa',!!s&&s.k==='q'&&(G.ph==='read'||G.ph==='q'||G.ph==='rev'));st.classList.toggle('stay',!!s&&((s.k==='q'&&(G.ph==='q'||G.ph==='rev'))||(s.k==='dd'&&G.ph==='rev')));
+  fit();if(fresh&&G.ph==='board')animateBoard();
+  const go=$('#go');if(go)go.onclick=()=>{const c=cur();if(G.ph==='rev'&&c&&c.k==='q'&&!c.cm)afterReveal(c);else next()};const ag=$('#again');if(ag)ag.onclick=()=>{hush();hostInit(true)};
+  hScore();
+}
+/* Passt die Bühne nicht auf den Bildschirm (kleiner Laptop, lange Frage, viele Spieler), wird sie verkleinert, statt die Punkteleiste aus dem Bild zu schieben */
+function fit(){
+  const st=$('#stage'),tv=$('#tv');if(!st||mode!=='host')return;st.style.zoom='';tv.classList.remove('tall');
+  if(!matchMedia('(min-width:900px) and (min-height:540px)').matches)return;   /* kleines Display (Handy als Host): normal scrollen */
+  st.classList.add('measure');let z=1;
+  for(let i=0;i<3;i++){const sh=st.scrollHeight,ch=st.clientHeight;if(!ch||sh<=ch+1)break;z=z*ch/sh*.985;if(z<.6){z=1;st.style.zoom='';tv.classList.add('tall');break}st.style.zoom=z}
+  st.classList.remove('measure');
+}
+addEventListener('resize',()=>{if(mode==='host'&&G)fit()});
+function hScore(){
+  if(!G)return;const r=actE().sort(byScore),sb=$('#sbar');
+  sb.classList.toggle('many',r.length>7);sb.innerHTML=r.map(([k,x],i)=>{const d=G.last[k];return `<div class="sc ${G.ph==='q'&&G.ans[k]?'done':''}${G.ph==='rev'&&d!=null?(d>=0?' won':' lost'):''}${r.length>1&&x.s===r[0][1].s&&x.s>r[r.length-1][1].s?' lead':''}" data-kick="${esc(k)}" title="Doppelklick: aus dem Spiel nehmen"><b>${i+1}. ${esc(x.n)}</b><span>${eur(x.s)}</span>${G.ph==='rev'&&d!=null?`<em class="${d>=0?'pos':'neg'}">${d>=0?'+':''}${eur(d)}</em>`:''}</div>`}).join('')||'<span class="hint">Punktestand erscheint, sobald Handys verbunden sind.</span>';
+  sb.querySelectorAll('[data-kick]').forEach(el=>el.ondblclick=()=>{G.kick=G.kick||{};G.kick[el.dataset.kick]=true;hScore();hPub();if(G.ph==='q')hCollect()});
+  const m=$('#cnt');if(m){const act=liveKeys().filter(k=>!G.kick[k]&&(G.miss[k]||0)<3);m.textContent=`${act.filter(k=>G.ans[k]).length} von ${act.length} haben geantwortet`}
+}
+document.addEventListener('keydown',e=>{
+  if(mode!=='host'||!G||e.repeat||e.ctrlKey||e.metaKey||e.altKey)return;
+  const tg=e.target&&e.target.closest?e.target:null;if(tg&&tg.closest('select,input,textarea'))return;
+  const k=String(e.key||'').toLowerCase();
+  if(k==='p'){$('#pause').click();return}if(k==='e'){$('#fxb').click();return}
+  if(k==='enter'||k===' '){
+    if(G.ph==='lobby'&&tg&&tg.closest('button'))return;   /* in der Lobby bedient die Tastatur den fokussierten Knopf */
+    const b=$('#go')||$('#cont')||$('#showEnd');if(b){e.preventDefault();b.click()}   /* am Endstand führt die Leertaste zur Rundenwahl, nie zu "alles auf 0" */
+  }
+});
+
+/* ========== SPIELER ========== */
+let myBet=null,me=ls.get('kp-name')||'',showCode='',joined=false,host=null,myR=null,myA=null,pPeer=null,pConn=null,pState='',retryT=null;
+/* Gerätekennung für den Host: so erkennt er dasselbe Handy nach einem Neuladen wieder. Ohne localStorage bleibt sie leer */
+const myCid=(()=>{let c=ls.get('kp-cid');if(!c){c=Math.random().toString(36).slice(2,12);ls.set('kp-cid',c);if(ls.get('kp-cid')!==c)c=''}return c})();
+const hiMsg=()=>myCid?{t:'hi',name:me,cid:myCid}:{t:'hi',name:me};
+function startPlayer(c){mode='player';showCode=c;$('#pick').hidden=true;$('#ph').classList.add('on');pRender()}
+function pConnect(){
+  clearTimeout(retryT);
+  if(!hasPeer){pState='Die Verbindungsbibliothek konnte nicht geladen werden. Seite neu laden.';return pRender()}
+  if(!pPeer||pPeer.destroyed){
+    pPeer=new Peer({debug:0});
+    pPeer.on('open',()=>dial());
+    pPeer.on('disconnected',()=>{setTimeout(()=>{try{pPeer.reconnect()}catch(e){}},1000)});
+    pPeer.on('error',e=>{if(e.type==='peer-unavailable'){pState='Show '+showCode+' nicht gefunden. Läuft der große Bildschirm? Ich versuche es weiter.';pRender();retryT=setTimeout(dial,2500)}else{pState='Verbindung hakt, ich versuche es weiter.';pRender();retryT=setTimeout(dial,3000)}});
+  }else dial();
+}
+function dial(){
+  clearTimeout(retryT);if(!pPeer||!pPeer.open){retryT=setTimeout(dial,1500);return}
+  try{pConn&&pConn.close()}catch(e){}
+  pState='Verbinde mit Show '+showCode+' …';pRender();
+  const c=pPeer.connect(PFX+showCode,{reliable:true});pConn=c;
+  c.on('open',()=>{if(pConn!==c)return;pState='';c.send(hiMsg());if(host&&myA!=null)c.send({t:'ans',r:host.r,a:myA});pRender()});
+  c.on('data',d=>{if(pConn!==c||!d||d.role!=='host')return;host=d;if(typeof d.you==='string'&&d.you&&d.you!==me)me=d.you.slice(0,20);if(host.r!==myR){myR=host.r;myA=null;myBet=null}pRender()});
+  c.on('close',()=>{if(pConn!==c)return;pState='Verbindung verloren, verbinde neu …';pRender();retryT=setTimeout(dial,1500)});
+}
+/* Handy war gesperrt oder im Hintergrund: beim Zurückkommen sofort prüfen, ob die Leitung noch steht */
+document.addEventListener('visibilitychange',()=>{if(mode==='player'&&joined&&document.visibilityState==='visible'&&(!pConn||!pConn.open)){try{if(pPeer&&pPeer.disconnected&&!pPeer.destroyed)pPeer.reconnect()}catch(e){}pConnect()}});
+function myScore(){if(!host||!Array.isArray(host.sc))return null;const i=host.sc.findIndex(x=>key(x[0])===key(me));return i<0?null:{rank:i+1,s:host.sc[i][1],d:host.sc[i][2],of:host.sc.length}}
+function pAnswer(i){if(!host||host.ph!=='q'||myA!=null)return;myA=i;try{navigator.vibrate&&navigator.vibrate(40)}catch(e){}try{pConn&&pConn.open&&pConn.send({t:'ans',r:host.r,a:i})}catch(e){}pRender()}
+function pRender(){
+  const b=$('#pBody'),m=myScore();$('#pMe').textContent=joined?(me+(m?' · '+eur(m.s):'')):'';
+  const vk0=b.dataset.vk||'';b.dataset.vk='';
+  if(!joined){
+    b.innerHTML=`<div class="state">Wie heißt du?</div><p class="muted">Dein Name erscheint auf dem großen Bildschirm.</p>
+      <form id="jf"><input id="nm" maxlength="20" autocomplete="off" value="${esc(me)}" placeholder="Vorname" aria-label="Name">
+      ${showCode?`<p class="muted">Show-Code: <b class="mini">${esc(showCode)}</b></p>`:'<input id="cd" maxlength="6" autocomplete="off" placeholder="Show-Code vom Fernseher" aria-label="Show-Code" style="margin-top:12px;text-transform:uppercase">'}
+      <button class="btn" style="margin-top:14px;width:100%">Rein in die Show</button></form>`;
+    $('#jf').onsubmit=e=>{e.preventDefault();const v=$('#nm').value.replace(/\s+/g,' ').trim();const cd=$('#cd');if(cd)showCode=cd.value.toUpperCase().replace(/[^A-Z0-9]/g,'');if(!v||!showCode)return;me=v.slice(0,20);ls.set('kp-name',me);joined=true;keepAwake();try{history.replaceState(null,'','#'+showCode)}catch(x){}pConnect();pRender()};return;
+  }
+  if(pState&&!host){b.innerHTML=`<div class="state">Moment …</div><p class="muted">${esc(pState)}</p>`;return}
+  if(!host){b.innerHTML=`<div class="state">Du bist drin, ${esc(me)}.</div><p class="muted">Warte auf den großen Bildschirm.</p>`;return}
+  const warn=pState?`<p class="warn">${esc(pState)}</p>`:'';
+  const ph=host.ph,a=Array.isArray(host.a)?host.a:[];
+  const out=!m&&Array.isArray(host.sc)&&host.sc.length?'<p class="muted">Du bist gerade nicht in der Wertung. Antworte bei der nächsten Frage, dann bist du wieder dabei.</p>':'';
+  if(ph==='lobby'){b.innerHTML=`<div class="state">Du bist drin, ${esc(me)}.</div><p class="muted">Gleich geht's los. Schnell und richtig bringt am meisten.</p>${warn}`;return}
+  if(ph==='end'){b.innerHTML=`<div class="state">${m?`Platz ${m.rank} von ${m.of}`:'Show vorbei'}</div><p class="ptimer">${m?eur(m.s):''}</p><p class="muted">Danke fürs Mitspielen. Bleib dran, vielleicht kommt noch eine Runde.</p>${warn}`;return}
+  if(ph==='fin'){b.innerHTML=`<div class="state">Finale!</div><p class="ptimer">Gleich setzt du</p><p>Du entscheidest selbst, wie viel du riskierst. Richtig gewinnt den Einsatz dazu, falsch verliert ihn.</p>${warn}`;return}
+  if(ph==='bet'){
+    const sc=m?m.s:0,mx=sc>0?sc:1000;
+    if(myBet!=null){b.innerHTML=`<div class="state">Einsatz gesetzt: ${eur(myBet)}</div><p class="muted">Kein Zurück. Gleich kommt die Finalfrage.</p>${warn}`;return}
+    const vk='bet:'+host.r;
+    if(vk0===vk){b.dataset.vk=vk;const t=b.querySelector('.ptimer');if(t)t.textContent=host.left|0;const w=b.querySelector('.pw');if(w)w.innerHTML=warn;return}
+    const opts=sc>0?[[0,'Nichts'],[Math.round(mx*.25/100)*100,'25 %'],[Math.round(mx*.5/100)*100,'Die Hälfte'],[Math.round(mx*.75/100)*100,'75 %'],[mx,'ALLES!']]:[[0,'Nichts'],[500,'500 €'],[1000,'1.000 €']];
+    b.dataset.vk=vk;
+    b.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><span class="muted">Finale · Dein Konto: ${eur(sc)}</span><span class="ptimer">${host.left|0}</span></div><div class="state">Wie viel setzt du?</div>
+      <div class="buzz">${opts.map(([v,l],i)=>`<button class="bz" data-v="${v}" style="background:${ACOL[i%4]}"><span class="l">${esc(l)}</span><span>${eur(v)}</span></button>`).join('')}</div><div class="pw">${warn}</div>`;
+    b.querySelectorAll('.bz').forEach(x=>x.onclick=()=>{if(myBet!=null||!host||host.ph!=='bet')return;myBet=+x.dataset.v;try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}try{pConn&&pConn.open&&pConn.send({t:'bet',r:host.r,v:myBet})}catch(e){}pRender()});return;
+  }
+  if(ph==='intro'){b.innerHTML=`<div class="state">Dis oder Dat!</div><p class="muted">Sechs Sekunden pro Name. Schau auf den Fernseher.</p>${warn}`;return}
+  if(ph==='read'){b.innerHTML=`<p class="muted">${esc(host.lab)}</p><div class="state" style="font-size:24px">${esc(host.t)}</div><p class="muted">Hör zu, gleich darfst du drücken.</p>${warn}`;return}
+  if(ph==='q'){
+    if(myA!=null){b.innerHTML=`<p class="muted">${esc(host.lab)}</p><div class="state">Antwort ist eingeloggt.</div><div class="lock" style="--c:${ACOL[myA]||ACOL[0]}">${host.k==='dd'?'':`<b>${LET[myA]||''}</b>`}<span>${esc(a[myA])}</span></div><p class="muted">Kein Zurück. Wie im echten Projekt.</p>${warn}`;return}
+    /* Solange dieselbe Frage läuft, nur die Sekunden tauschen: ein Neuaufbau mitten im Tippen würde den Tipp verschlucken */
+    const vk='q:'+host.r+':'+a.length;
+    if(vk0===vk){b.dataset.vk=vk;const t=b.querySelector('.ptimer');if(t)t.textContent=host.left|0;const w=b.querySelector('.pw');if(w)w.innerHTML=warn;return}
+    b.dataset.vk=vk;
+    b.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><span class="muted">${esc(host.lab)}</span><span class="ptimer">${host.left|0}</span></div>
+      ${host.k==='dd'?`<div class="state" style="text-align:center">${esc(host.t)}</div>`:''}
+      <div class="buzz">${a.map((t,i)=>`<button class="bz ${host.k==='dd'?'dd2':''}" data-i="${i}" style="background:${ACOL[i]}">${host.k==='dd'?'':`<span class="l">${LET[i]}</span>`}<span>${esc(t)}</span></button>`).join('')}</div><div class="pw">${warn}</div>`;
+    b.querySelectorAll('.bz').forEach(x=>x.onclick=()=>pAnswer(+x.dataset.i));return;
+  }
+  if(ph==='board'||ph==='wait'){
+    const sc=Array.isArray(host.sc)?host.sc:[];const ahead=m&&m.rank>1?sc[m.rank-2]:null;
+    b.innerHTML=`<p class="muted">Zwischenstand</p><div class="state">${m?`Platz ${m.rank} von ${m.of}`:'Zwischenstand'}</div><p class="ptimer">${m?eur(m.s):'0 €'}</p>
+      ${m&&m.rank===1?'<p>Du führst. Jetzt bloß nicht nachlassen.</p>':ahead?`<p>Noch <b>${eur(ahead[1]-m.s)}</b> bis Platz ${m.rank-1} (${esc(ahead[0])}).</p>`:''}${out}${warn}`;return;
+  }
+  if(ph==='rev'){
+    if(host.c==null){b.innerHTML=`<div class="state">Zwischenstand</div><p class="ptimer">${m?eur(m.s):''}</p><p class="muted">${m?`Platz ${m.rank} von ${m.of}`:''}</p>${warn}`;return}
+    const d=m?m.d:null;
+    b.innerHTML=`<div class="state">${d==null?'Keine Antwort':d>0?'Richtig!':'Leider falsch'}</div>
+      <p class="ptimer" style="color:${d==null?'var(--soft)':d>0?'var(--a1)':'var(--bad)'}">${d==null?'0 €':(d>0?'+':'')+eur(d)}</p>
+      <p class="muted">Richtig war ${host.k==='dd'?'':LET[host.c]+': '}${esc(a[host.c])}</p><p>Kontostand: <b>${m?eur(m.s):'0 €'}</b>${m?` · Platz ${m.rank} von ${m.of}`:''}</p>${out}${warn}`;
+  }
+}
+if(hashCode)startPlayer(hashCode);
+}
+</script>
+</body>
+</html>
