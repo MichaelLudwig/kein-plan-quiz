@@ -327,12 +327,14 @@ function actV(){return actE().map(([,x])=>x)}
 function endShow(){hush();G.ph='end';FX.burst(0xe3b54a,900);setTimeout(()=>FX.burst(0x33c7a6,700),700);setTimeout(()=>FX.burst(0x5c9bd6,700),1400);hRender();hPub();beep(523,.15);setTimeout(()=>beep(659,.15),160);setTimeout(()=>beep(784,.4),320);saveState();const r=actV().sort((a,b)=>b.s-a.s),top=r[0],last=r[r.length-1];say(top?`Und damit ist es entschieden! Gewinner von Kein Plan, Herr Berater: ${top.n}, mit ${top.s} Euro! Herzlichen Glückwunsch, du darfst morgen das Statusmeeting moderieren.`+(r.length>1?' '+pickLine(ROASTS,'kp-used-roast',{n:last.n}):''):'Das war Kein Plan, Herr Berater.')}
 function rankMap(){const m={},v=actE();v.forEach(([k,x])=>m[k]=1+v.filter(([,y])=>y.s>x.s).length);return m}
 function showBoard(s){
-  if(cur()!==s||G.ph!=='rev')return;clearTimeout(autoT);G.ph='board';FX.mood('board');FX.pulse();hRender();hPub();beep(660,.08);setTimeout(()=>beep(880,.12),120);
-  saveState();const r=actV().sort((a,b)=>b.s-a.s);let line='Zwischenstand.';
-  if(r.length>1){const top=r[0],last=r[r.length-1],gap=top.s-r[1].s;line=(gap>0?pickLine(LEADS,'kp-used-lead',{n:top.n,s:top.s,gap,m:r[1].n}):`${top.n} und ${r[1].n} liegen gleichauf mit ${top.s} Euro. Das klären wir im nächsten Meeting.`)+' '+pickLine(ROASTS,'kp-used-roast',{n:last.n})}
-  else if(r.length===1)line=`${r[0].n} hat ${r[0].s} Euro. Gegen sich selbst gewinnt man immer.`;
-  G.boardLine=line;hRender();
-  say(line,true).then(()=>{if(auto&&cur()===s&&G.ph==='board')autoT=setTimeout(()=>{if(auto&&cur()===s&&G.ph==='board')next()},2500)});
+  if(cur()!==s||G.ph!=='rev')return;clearTimeout(autoT);const big=s.n===6||s.n===12;
+  saveState();const r=actV().sort((a,b)=>b.s-a.s);let line='';
+  if(r.length>1){const top=r[0],last=r[r.length-1],gap=top.s-r[1].s;line=s.n%3===0?(gap>0?pickLine(LEADS,'kp-used-lead',{n:top.n,s:top.s,gap,m:r[1].n}):`${top.n} und ${r[1].n} liegen gleichauf mit ${top.s} Euro. Das klären wir im nächsten Meeting.`):pickLine(ROASTS,'kp-used-roast',{n:last.n})}
+  else if(r.length===1&&big)line=`${r[0].n} hat ${r[0].s} Euro. Gegen sich selbst gewinnt man immer.`;
+  if(big){G.ph='board';FX.mood('board');FX.pulse();beep(660,.08);setTimeout(()=>beep(880,.12),120);line=line||'Zwischenstand.'}
+  if(!line){next();return}
+  const ph=G.ph;G.boardLine=line;hRender();hPub();
+  say(line,true).then(()=>{if(auto&&cur()===s&&G.ph===ph)autoT=setTimeout(()=>{if(auto&&cur()===s&&G.ph===ph)next()},big?2500:700)});
 }
 function boardHtml(){
   const r=actE().sort((a,b)=>b[1].s-a[1].s),pr=G.prevRank||{};const mx=Math.max(1,...r.map(([k,x])=>Math.abs(x.s)));
