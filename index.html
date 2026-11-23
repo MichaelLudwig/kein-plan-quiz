@@ -114,6 +114,14 @@ body.fxon .tbar,body.fxon .sbar{background:rgba(10,20,34,.92)}
 .tbarline.low{animation:tick .5s infinite}
 .stagebox.fresh .an.no{animation:none}
 .stagebox{position:relative}
+.rounds{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;max-width:1300px}
+.rnd{all:unset;cursor:pointer;display:grid;gap:2px;background:rgba(15,28,46,.86);border:1px solid var(--line);border-left:4px solid var(--a1);border-radius:3px;padding:12px 16px}
+.rnd b{font:700 clamp(16px,1.5vw,22px) 'IBM Plex Sans',sans-serif}
+.rnd span{font:500 13px 'IBM Plex Mono',monospace;color:var(--soft)}
+.rnd em{font:600 13px 'IBM Plex Mono',monospace;font-style:normal;color:var(--a1)}
+.rnd.done{border-left-color:var(--soft);opacity:.7}.rnd.done em{color:var(--soft)}
+.rnd.on{border-color:var(--y);border-left-color:var(--y);opacity:1;box-shadow:0 0 0 1px var(--y),0 0 30px rgba(227,181,74,.2)}
+.rnd:focus-visible{outline:2px solid var(--y)}
 .bulbs{position:absolute;inset:.8vh 1.6vw;pointer-events:none;padding:9px;border-radius:14px;background:radial-gradient(circle,#ffe08a 0 3.2px,rgba(227,181,74,.25) 4.2px,transparent 5.5px) 0 0/22px 22px;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:chase 1s steps(2) infinite;opacity:.85;filter:drop-shadow(0 0 6px rgba(227,181,74,.6))}
 @keyframes chase{to{background-position:11px 11px}}
 .bulbs.fast{animation-duration:.35s}
@@ -160,7 +168,7 @@ body.fxon .tbar,body.fxon .sbar{background:rgba(10,20,34,.92)}
 </section>
 
 <div id="tv">
-  <div class="tbar"><span class="logo"><svg viewBox="0 0 148 40" role="img" aria-label="Kioptra"><g transform="translate(-2.84,-9.4) scale(0.186)" fill="none" stroke="#E3B54A" stroke-linecap="round" stroke-linejoin="round"><line x1="90" y1="180" x2="56" y2="250" stroke-width="11"></line><line x1="114" y1="180" x2="114" y2="254" stroke-width="11"></line><line x1="138" y1="180" x2="172" y2="250" stroke-width="11"></line><line x1="114" y1="82" x2="114" y2="180" stroke-width="9"></line><path d="M53.8 96.7 A62 62 0 0 0 174.2 67.3" stroke-width="10"></path><line x1="32" y1="102" x2="196" y2="62" stroke-width="12"></line><line x1="76" y1="180" x2="152" y2="180" stroke-width="13"></line></g><text x="42" y="27" font-family="IBM Plex Sans,system-ui,sans-serif" font-weight="600" font-size="23" letter-spacing="-0.3" fill="#eef3fb">Kioptra</text></svg></span><span class="marq">Kein Plan, Herr Berater</span><span class="lab" id="tLab"></span><span class="mini" id="tCode"></span><button class="ibtn" id="fxb">Effekte an</button><button class="ibtn" id="finb">Finale</button><button class="ibtn" id="pause">Auto an</button><button class="ibtn" id="mute">Ton an</button></div>
+  <div class="tbar"><span class="logo"><svg viewBox="0 0 148 40" role="img" aria-label="Kioptra"><g transform="translate(-2.84,-9.4) scale(0.186)" fill="none" stroke="#E3B54A" stroke-linecap="round" stroke-linejoin="round"><line x1="90" y1="180" x2="56" y2="250" stroke-width="11"></line><line x1="114" y1="180" x2="114" y2="254" stroke-width="11"></line><line x1="138" y1="180" x2="172" y2="250" stroke-width="11"></line><line x1="114" y1="82" x2="114" y2="180" stroke-width="9"></line><path d="M53.8 96.7 A62 62 0 0 0 174.2 67.3" stroke-width="10"></path><line x1="32" y1="102" x2="196" y2="62" stroke-width="12"></line><line x1="76" y1="180" x2="152" y2="180" stroke-width="13"></line></g><text x="42" y="27" font-family="IBM Plex Sans,system-ui,sans-serif" font-weight="600" font-size="23" letter-spacing="-0.3" fill="#eef3fb">Kioptra</text></svg></span><span class="marq">Kein Plan, Herr Berater</span><span class="lab" id="tLab"></span><span class="mini" id="tCode"></span><button class="ibtn" id="fxb">Effekte an</button><button class="ibtn" id="finb" style="display:none">Finale</button><button class="ibtn" id="pause">Auto an</button><button class="ibtn" id="mute">Ton an</button></div>
   <div class="stagebox" id="stage"></div>
   <div class="sbar" id="sbar"></div>
 </div>
@@ -225,9 +233,13 @@ let POOL=[],poolOk=false;
 const pickLine=(list,k,v)=>{let used=[];try{used=JSON.parse(ls.get(k)||'[]')}catch(e){}let free=list.filter(x=>!used.includes(x));if(!free.length){used=[];free=list.slice()}const x=free[Math.floor(Math.random()*free.length)];used.push(x);ls.set(k,JSON.stringify(used));return x.replace(/\{(\w+)\}/g,(_,w)=>v[w]??'')};
 const curDD=()=>(G&&cur()&&cur().dd)||DD;
 function setSteps(set){const DDx=set.dd;const p=[];set.qs.forEach((q,i)=>{if(q.dd){if(!DDx)return;p.push({k:'ddi',id:set.id+'-dd',dd:DDx});shuffle(DDx.items).forEach((it,j)=>p.push({k:'dd',id:set.id+'-dd',t:it[0],c:it[1],a:DDx.opts,n:j+1,of:DDx.items.length,val:500,dd:DDx}));p.push({k:'dde',id:set.id+'-dd',dd:DDx});return}p.push(Object.assign({k:'q',id:set.id+'-'+i},q))});return p}
-function refill(){for(const set of POOL){const rest=setSteps(set).filter(x=>!G.done.includes(x.id));if(rest.length){G.plan.push(...rest);return true}}return false}
+function playedMap(){let m={};try{m=JSON.parse(ls.get('kp-played')||'{}')}catch(e){}POOL.forEach(x=>{if(x.played&&!m[x.id])m[x.id]=x.played});return m}
+function markPlayed(id){let m={};try{m=JSON.parse(ls.get('kp-played')||'{}')}catch(e){}if(!m[id]){m[id]=new Date().toLocaleDateString('de-DE');ls.set('kp-played',JSON.stringify(m))}}
+function defaultSel(){const pm=playedMap();const f=POOL.find(x=>!pm[x.id]);return (f||POOL[0]||{}).id||null}
+function refill(){for(const set of POOL){if(G.sel&&set.id!==G.sel)continue;const rest=setSteps(set).filter(x=>!G.done.includes(x.id));if(rest.length){G.plan.push(...rest);return true}}return false}
 function freshCount(){if(!G)return 0;return POOL.reduce((a,set)=>a+setSteps(set).filter(x=>x.k==='q'&&!G.done.includes(x.id)).length,0)}
 async function loadPool(){try{const r=await fetch('questions.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;const j=await r.json();(j.sets||[]).forEach(set=>{if(set&&set.id&&Array.isArray(set.qs)&&!POOL.some(x=>x.id===set.id))POOL.push(set)});(j.roasts||[]).forEach(x=>{if(!ROASTS.includes(x))ROASTS.push(x)});(j.leads||[]).forEach(x=>{if(!LEADS.includes(x))LEADS.push(x)});poolOk=true}catch(e){if(!poolOk&&!POOL.length){POOL.push({id:'p1',qs:QS,dd:DD},{id:'p2',qs:QS2,dd:DD2})}}
+  if(G&&G.ph==='lobby'&&(!G.sel||!POOL.some(x=>x.id===G.sel)))G.sel=defaultSel();
   if(G&&G.ph==='wait'&&refill())next();else if(G&&G.ph==='lobby')hRender()}
 setInterval(()=>{if(mode==='host')loadPool()},40000);
 const FINALS=[
@@ -333,7 +345,7 @@ $('#fxb').onclick=()=>{const o=FX.toggle();$('#fxb').textContent=o?'Effekte aus'
 $('#finb').onclick=()=>{if(!G||G.final)return;G.finalNext=true;$('#finb').classList.add('on');$('#finb').textContent='Finale kommt'};
 function hush(){try{speechSynthesis.cancel()}catch(e){}}
 $('#mute').onclick=()=>{muted=!muted;if(muted)hush();$('#mute').textContent=muted?'Ton aus':'Ton an'};
-function hostInit(reset){let st=null;try{st=JSON.parse(ls.get('kp-state')||'null')}catch(e){}if(reset||!st||Date.now()-st.t>8*3600e3)st=null;G={id:Math.random().toString(36).slice(2,7),step:-1,plan:[],scores:st?st.scores:{},done:st?st.done:[],n:st?st.n:0,restored:!!st,limit:st&&st.limit?st.limit:20,fdone:st&&st.fdone?st.fdone:[],ans:{},ph:'lobby',last:{}};if(reset)saveState();hRender();hPub();loadPool()}
+function hostInit(reset){let st=null;try{st=JSON.parse(ls.get('kp-state')||'null')}catch(e){}if(reset||!st||Date.now()-st.t>8*3600e3)st=null;G={id:Math.random().toString(36).slice(2,7),step:-1,plan:[],scores:st?st.scores:{},done:st?st.done:[],n:st?st.n:0,restored:!!st,limit:st&&st.limit?st.limit:20,fdone:st&&st.fdone?st.fdone:[],ans:{},ph:'lobby',last:{},sel:null};if(reset)saveState();hRender();hPub();loadPool()}
 function newCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];return s}
 function hostNet(retry){
   if(!hasPeer){netErr='Die Verbindungsbibliothek konnte nicht geladen werden.';return hRender()}
@@ -380,15 +392,15 @@ function state(){
 }
 function sendTo(c){try{c.open&&c.send(state())}catch(e){}}
 function hPub(){if(!G)return;for(const x of conns.values())sendTo(x.c)}
-function hLabel(){const s=cur();if(G.ph==='lobby')return 'Lobby';if(G.ph==='end')return 'Endstand';if(G.ph==='bet')return 'Finale · Einsätze';if(G.ph==='wait')return 'Kurze Pause';if(!s)return '';if(s.k==='q'&&s.fin)return 'Finale · Alles oder nichts';if(s.k==='q')return `Frage ${s.n} von ${G.limit} · ${eur(s.val)}`;if(s.k==='fi')return 'Finale';return 'Dis oder Dat'}
+function hLabel(){const s=cur();if(G.ph==='lobby')return 'Lobby';if(G.ph==='end')return 'Endstand';if(G.ph==='bet')return 'Finale · Einsätze';if(G.ph==='wait')return 'Kurze Pause';if(!s)return '';if(s.k==='q'&&s.fin)return 'Finale · Alles oder nichts';if(s.k==='q')return `Frage ${s.n} von ${G.limit-(G.base||0)} · ${eur(s.val)}`;if(s.k==='fi')return 'Finale';return 'Dis oder Dat'}
 function next(){
   hush();clearInterval(tick);clearTimeout(autoT);G.autoAt=0;G.last={};
+  if(G.step<0){if(G.sel){G.final=false;G.finalNext=false;const set=POOL.find(x=>x.id===G.sel);const cnt=()=>set?setSteps(set).filter(x=>x.k==='q'&&!G.done.includes(x.id)).length:0;if(set&&!cnt())G.done=G.done.filter(id=>!String(id).startsWith(G.sel+'-'));G.plan=[];G.base=G.n;G.limit=G.n+Math.max(1,cnt());markPlayed(G.sel)}else if(G.n>=G.limit)G.limit=G.n+20}
+  if(!G.final&&(G.finalNext||G.n>=G.limit)){const c=cur();const inDD=c&&(c.k==='dd'||c.k==='ddi');if(!inDD&&!G.finalNext){endShow();return}if(!inDD){G.final=true;G.finalNext=false;const SF=G.sel&&(POOL.find(x=>x.id===G.sel)||{}).final;const F=SF?Object.assign({i:''},SF):(FINALS.find((f,i)=>!G.fdone.includes(i))||FINALS[0]);if(!SF)G.fdone.push(FINALS.indexOf(F));G.plan.splice(G.step+1,0,{k:'fi',id:'fin-i'},Object.assign({k:'q',fin:1,id:'fin-q',val:0},F))}}
   if(G.step+1>=G.plan.length&&!refill()){G.ph='wait';hRender();hPub();say('Kurze Pause. Ich hole neue Fragen aus dem Backlog. Holt euch was zu trinken.',true);loadPool();return}
-  if(G.step<0&&G.n>=G.limit)G.limit=G.n+20;
-  if(!G.final&&(G.finalNext||G.n>=G.limit)){const c=cur();const inDD=c&&(c.k==='dd'||c.k==='ddi');if(!inDD){G.final=true;G.finalNext=false;const F=FINALS.find((f,i)=>!G.fdone.includes(i))||FINALS[0];G.fdone.push(FINALS.indexOf(F));G.plan.splice(G.step+1,0,{k:'fi',id:'fin-i'},Object.assign({k:'q',fin:1,id:'fin-q',val:0},F))}}
   G.step++;const s=cur();if(s.k!=='dd'&&!s.fin&&s.k!=='fi'&&!G.done.includes(s.id))G.done.push(s.id);
   if(s.k==='fi'){G.ph='fin';FX.burst(0xe3b54a,900);setTimeout(()=>FX.burst(0x8e84d8,700),600);hRender();hPub();say(FIN_I,true).then(()=>{if(cur()===s&&G.ph==='fin')startBet(s)});return}
-  if(s.k==='q'&&!s.fin){G.n++;s.n=G.n;s.val=G.n<=5?1000:G.n<=11?2000:3000}
+  if(s.k==='q'&&!s.fin){G.n++;s.n=G.n-(G.base||0);s.val=s.n<=6?1000:s.n<=13?2000:3000}
   if(s.fin){G.ph='read';hRender();hPub();say('Die Finalfrage. '+s.q,true).then(()=>{if(cur()===s&&G.ph==='read')ask(20)});return}
   if(s.k==='ddi'){FX.burst(0x8e84d8,700);G.ph='intro';hRender();hPub();say(curDD().i,true).then(()=>{if(cur()===s)next()});return}
   if(s.k==='dde'){G.ph='rev';hRender();hPub();say(curDD().end,true).then(()=>autoNext(s,2500));return}
@@ -436,7 +448,8 @@ function hRender(){
       </div>
       <div class="players">${ps.length?ps.map(p=>`<div class="pl">${esc(p.name)}</div>`).join(''):'<div class="hint">Noch niemand da.</div>'}</div>
       <div class="meta">Stimme: <select id="vsel" class="ibtn" style="max-width:340px">${voices.map(v=>`<option${voice&&v.name===voice.name?' selected':''}>${esc(v.name)}</option>`).join('')||'<option>Standard</option>'}</select><button class="ibtn" id="vtest">Test</button></div>
-      <div class="meta">${POOL.length?`${freshCount()} neue Fragen bereit`:'Lade Fragen …'}· Finale nach Frage <button class="ibtn" id="lm">−5</button> <b>${G.limit}</b> <button class="ibtn" id="lp">+5</button>${G.restored?` · Spielstand übernommen (${G.n} Fragen gespielt) <button class="ibtn" id="reset">Kontostände auf 0</button>`:''}</div>
+      <div class="hint">Runde wählen:</div><div class="rounds">${POOL.length?POOL.map(x=>{const pm=playedMap(),qn=x.qs.filter(q=>!q.dd).length;return `<button class="rnd${x.id===G.sel?' on':''}${pm[x.id]?' done':''}" data-set="${esc(x.id)}"><b>${esc(x.name||x.id)}</b><span>${qn} Fragen${x.dd?' + Dis oder Dat':''}</span><em>${pm[x.id]?'gespielt '+esc(pm[x.id]):'neu'}</em></button>`}).join(''):'<span class="hint">Lade Runden …</span>'}</div>
+      <div class="meta">Ohne Finale · Kontostand: ${Object.keys(G.scores).length?'läuft weiter':'alle bei 0'} <button class="ibtn" id="reset">Kontostände auf 0</button></div>
       <div><button class="btn" id="go" style="display:inline-block;padding:20px 40px">Show starten</button> <span class="hint">&nbsp;Danach läuft alles automatisch. P = Pause</span></div>`;
   }else if(G.ph==='bet'){
     const r=actE().sort((a,b)=>b[1].s-a[1].s);
@@ -449,7 +462,7 @@ function hRender(){
     st.innerHTML=`<div class="marq big">Dis oder Dat</div><div class="qtext">${esc(curDD().opts.join(' oder '))}?</div><div class="quip">${esc(curDD().i)}</div>`;
   }else if(G.ph==='end'){
     const r=actV().sort((a,b)=>b.s-a.s);
-    st.innerHTML=`<div class="marq big">${r.length?`Sieg für <em>${esc(r[0].n)}</em>`:'Endstand'}</div><div class="podium">${r.map((x,i)=>`<div><span>${i+1}. ${esc(x.n)}</span><span>${eur(x.s)}</span></div>`).join('')||'<div><span>Keine Handys dabei</span><span>Ehre: unbezahlbar</span></div>'}</div><div style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn" id="cont" style="padding:18px 36px">Weiterspielen</button><button class="btn ghost" id="again" style="padding:18px 30px">Neues Spiel, alles auf 0</button></div>`;
+    st.innerHTML=`<div class="marq big">${r.length?`Sieg für <em>${esc(r[0].n)}</em>`:'Endstand'}</div><div class="podium">${r.map((x,i)=>`<div><span>${i+1}. ${esc(x.n)}</span><span>${eur(x.s)}</span></div>`).join('')||'<div><span>Keine Handys dabei</span><span>Ehre: unbezahlbar</span></div>'}</div><div style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn" id="cont" style="padding:18px 36px">Nächste Runde wählen</button><button class="btn ghost" id="again" style="padding:18px 30px">Neues Spiel, alles auf 0</button></div>`;
   }else if(G.ph==='wait'){
     st.innerHTML=`<div class="meta"><span class="pill">Kurze Pause</span><span>Kevin holt neue Fragen aus dem Backlog. Es geht automatisch weiter.</span></div>
       <div class="marq" style="font-size:clamp(30px,4vw,64px)">Zwischenstand</div>${boardHtml()}
@@ -478,10 +491,11 @@ function hRender(){
     }
   }
   const vs=$('#vsel');if(vs){vs.onchange=()=>{ls.set('kp-voice',vs.value);pickVoice()};$('#vtest').onclick=()=>say('Willkommen bei Kein Plan, Herr Berater! Ich bin Kevin vom Helpdesk, und heute geht es um euren Tagessatz.')}
+  document.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{G.sel=b.dataset.set;hRender()});
   const rs=$('#reset');if(rs)rs.onclick=()=>{if(G.ph==='lobby'){G.scores={};G.n=0;G.limit=20;G.restored=false;for(const x of livePlayers())G.scores[key(x.name)]={n:x.name,s:0};saveState();hRender();hPub()}};
   const sh=$('#showEnd');if(sh)sh.onclick=endShow;
   const lm=$('#lm'),lp=$('#lp');if(lm){lm.onclick=()=>{G.limit=Math.max(G.n+1,G.limit-5);saveState();hRender()};lp.onclick=()=>{G.limit+=5;saveState();hRender()}}
-  const cn=$('#cont');if(cn)cn.onclick=()=>{G.final=false;G.limit=G.n+15;G.ph='wait';next()};
+  const cn=$('#cont');if(cn)cn.onclick=()=>{hush();G.final=false;G.finalNext=false;G.step=-1;G.plan=[];G.ph='lobby';G.last={};G.sel=defaultSel();saveState();hRender();hPub()};
   if(['read','q','rev','bet','fin','board','intro','end'].includes(G.ph)){const bl=document.createElement('div');bl.className='bulbs'+((G.ph==='q'||G.ph==='bet')?' fast':'');st.prepend(bl)}
   if((G.ph==='q'||G.ph==='bet')){const rg=document.createElement('div');rg.className='ring';rg.id='ring';rg.innerHTML='<svg viewBox="0 0 100 100"><circle class="bg" cx="50" cy="50" r="44"/><circle class="fg" id="rgc" cx="50" cy="50" r="44" stroke-dasharray="276.5" stroke-dashoffset="0"/></svg><b id="rgn"></b>';st.append(rg);updRing()}
   if(fresh&&G.ph==='read'&&s&&s.k==='q'){const sp=document.createElement('div');sp.className='splash';sp.innerHTML=s.fin?'<div><b>FINALE</b><span>Alles oder nichts</span></div>':`<div><b>Frage ${s.n}</b><span>${eur(s.val)}</span></div>`;st.append(sp);setTimeout(()=>sp.remove(),1900);beep(330,.1);setTimeout(()=>beep(495,.18),140)}
